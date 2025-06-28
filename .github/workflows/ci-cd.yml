@@ -232,7 +232,7 @@ jobs:
       - name: 문서 생성 도구 설치
         run: |
           python -m pip install --upgrade pip
-          pip install ast-grep pydantic typing-extensions
+          pip install toml pydantic typing-extensions
           cd packages/${{ matrix.module }}
           pip install -e ".[dev]" || pip install -e .
       
