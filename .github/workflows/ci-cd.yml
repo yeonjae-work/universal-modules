@@ -198,99 +198,27 @@ jobs:
       
       - name: 빌드 도구 설치
         run: |
-          python -m pip install --upgrade pip build twine
-      
+          python -m pip install --upgrade pip
+          pip install build twine
+
       - name: 패키지 빌드
         run: |
           cd packages/${{ matrix.module }}
           python -m build
+          echo "✅ ${{ matrix.module }} 빌드 완료"
 
       - name: 빌드 아티팩트 업로드
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.module }}-dist
+          name: dist-${{ matrix.module }}
           path: packages/${{ matrix.module }}/dist/
+          retention-days: 7
 
   # 문서 업데이트
   documentation:
     name: "문서 업데이트"
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
-    if: needs.detect-changes.outputs.has-changes == 'true'
-    strategy:
-      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-      
-      - name: Python 환경 설정
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: 문서 생성 도구 설치
-        run: |
-          python -m pip install --upgrade pip
-          pip install toml pydantic typing-extensions
-          cd packages/${{ matrix.module }}
-          pip install -e ".[dev]" || pip install -e .
-      
-      - name: 기술명세서 업데이트
-        run: |
-          python scripts/update-documentation.py ${{ matrix.module }}
-      
-      - name: 변경사항 확인
-        id: check-changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # docs 디렉터리가 존재하는지 확인
-          if [ ! -d "packages/${{ matrix.module }}/docs" ]; then
-            echo "📁 docs 디렉터리 생성: packages/${{ matrix.module }}/docs"
-            mkdir -p packages/${{ matrix.module }}/docs
-          fi
-          
-          # Git에 docs 디렉터리 추가 (존재하지 않는 경우)
-          git add packages/${{ matrix.module }}/docs/ || true
-          
-          # 변경사항 확인
-          if git diff --quiet HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null; then
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "📄 ${{ matrix.module }}: 문서 변경사항 없음"
-          else
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "📝 ${{ matrix.module }}: 문서 업데이트 감지"
-            git diff --name-only HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null || echo "새로운 문서 파일 감지"
-          fi
-      
-      - name: 문서 변경사항 커밋
-        if: steps.check-changes.outputs.changes == 'true'
-        run: |
-          git add packages/${{ matrix.module }}/docs/
-          git commit -m "docs(${{ matrix.module }}): 기술명세서 자동 업데이트
-          
-          - API 문서 동기화
-          - 코드 구조 분석 반영
-          - 성능 메트릭 업데이트
-          
-          [skip ci]"
-      
-      - name: 문서 아티팩트 업로드
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-${{ matrix.module }}
-          path: packages/${{ matrix.module }}/docs/
-
-  # 문서 통합 및 푸시
-  docs-consolidate:
-    name: "문서 통합 및 푸시"
-    runs-on: ubuntu-latest
-    needs: [detect-changes, documentation]
     if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
     
     steps:
@@ -299,60 +227,47 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-      
-      - name: Git 설정
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
-      - name: 최신 변경사항 가져오기
-        run: |
-          git pull origin main
-      
-      - name: 모든 문서 아티팩트 다운로드
-        uses: actions/download-artifact@v4
+
+      - name: Python 환경 설정
+        uses: actions/setup-python@v4
         with:
-          pattern: docs-*
-          path: ./docs-artifacts
-      
-      - name: 문서 아티팩트 복원
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 문서 업데이트 스크립트 실행
         run: |
-          for module in ${{ needs.detect-changes.outputs.changed-modules }}; do
-            if [ -d "./docs-artifacts/docs-$module" ]; then
-              echo "📄 $module 문서 복원 중..."
-              cp -r "./docs-artifacts/docs-$module/"* "packages/$module/docs/" || true
-            fi
-          done
-      
-      - name: 통합 문서 변경사항 확인 및 푸시
-        run: |
-          # 모든 docs 디렉터리를 Git에 추가
-          git add packages/*/docs/ || true
-          
-          # 변경사항이 있는지 확인
-          if ! git diff --quiet --cached 2>/dev/null; then
-            echo "📚 통합 문서 업데이트 감지"
-            git commit -m "docs: 변경된 모듈 기술명세서 자동 업데이트
-            
-            🤖 자동 생성된 문서 업데이트:
-            - 변경된 모듈: ${{ needs.detect-changes.outputs.changed-modules }}
-            - API 구조 분석 및 동기화
-            - 코드 변경사항 반영
-            - 성능 메트릭 및 사용법 업데이트
-            
-            [skip ci]" || echo "커밋할 변경사항이 없습니다."
-            
-            git push origin main || echo "푸시할 변경사항이 없습니다."
-            echo "✅ 문서 업데이트 완료"
+          if [ -f "scripts/update-documentation.py" ]; then
+            python scripts/update-documentation.py
+            echo "📚 문서 업데이트 완료"
           else
-            echo "📄 문서 변경사항 없음"
+            echo "📚 문서 업데이트 스크립트를 찾을 수 없습니다."
           fi
 
-  # PyPI 배포 (main 브랜치만)
+      - name: 변경사항 커밋 및 푸시
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # docs 디렉터리가 없으면 생성
+          if [ ! -d "docs" ]; then
+            mkdir -p docs
+            echo "📁 docs 디렉터리 생성"
+          fi
+          
+          # Git에서 추적하지 않는 파일들 확인
+          if git status --porcelain | grep -q .; then
+            git add .
+            git commit -m "docs: Update documentation [skip ci]" || echo "커밋할 변경사항이 없습니다."
+            git push || echo "푸시할 변경사항이 없습니다."
+            echo "📚 문서 변경사항 커밋 및 푸시 완료"
+          else
+            echo "📚 문서 변경사항 없음"
+          fi
+
+  # PyPI 배포
   deploy:
     name: "PyPI 배포"
     runs-on: ubuntu-latest
-    needs: [detect-changes, build, docs-consolidate]
+    needs: [detect-changes, build, documentation]
     if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
@@ -360,150 +275,74 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
       - name: Python 환경 설정
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       
-      - name: 도구 설치
-        run: |
-          python -m pip install --upgrade pip twine toml semver
-      
       - name: 빌드 아티팩트 다운로드
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.module }}-dist
+          name: dist-${{ matrix.module }}
           path: packages/${{ matrix.module }}/dist/
-      
+
       - name: 버전 변경 확인
         id: version-check
         run: |
           cd packages/${{ matrix.module }}
-          current_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
           
-          # 이전 태그와 비교
-          latest_tag=$(git tag -l "${{ matrix.module }}-v*" --sort=-version:refname | head -n1)
-          if [ -n "$latest_tag" ]; then
-            latest_version=${latest_tag#${{ matrix.module }}-v}
+          # pyproject.toml에서 패키지명과 버전 추출
+          if [ -f "pyproject.toml" ]; then
+            # grep과 sed를 사용하여 패키지명 추출
+            package_name=$(grep '^name\s*=' pyproject.toml | head -n1 | sed 's/.*=\s*["\x27]\([^"\x27]*\)["\x27].*/\1/' | tr -d ' ')
+            if [ -z "$package_name" ]; then
+              echo "⚠️ 패키지명을 찾을 수 없습니다. 기본값 사용: ${{ matrix.module }}"
+              package_name="${{ matrix.module }}"
+            fi
+            
+            # 버전 추출
+            current_version=$(grep '^version\s*=' pyproject.toml | head -n1 | sed 's/.*=\s*["\x27]\([^"\x27]*\)["\x27].*/\1/' | tr -d ' ')
+            
+            echo "📦 패키지명: $package_name"
+            echo "🏷️ 현재 버전: $current_version"
+            
+            # PyPI에서 최신 버전 확인
+            latest_version=$(pip index versions "$package_name" 2>/dev/null | head -n1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -n1 || echo "0.0.0")
+            echo "🏷️ PyPI 최신 버전: $latest_version"
+            
             if [ "$current_version" != "$latest_version" ]; then
-              echo "version-changed=true" >> $GITHUB_OUTPUT
-              echo "new-version=$current_version" >> $GITHUB_OUTPUT
-              echo "📦 ${{ matrix.module }}: 버전 변경 감지 ($latest_version → $current_version)"
+              echo "🚀 새 버전 감지: $latest_version -> $current_version"
+              echo "should-deploy=true" >> $GITHUB_OUTPUT
+              echo "package-name=$package_name" >> $GITHUB_OUTPUT
+              echo "version=$current_version" >> $GITHUB_OUTPUT
             else
-              echo "version-changed=false" >> $GITHUB_OUTPUT
-              echo "📦 ${{ matrix.module }}: 버전 변경 없음 ($current_version)"
+              echo "📋 버전 변경 없음: $current_version"
+              echo "should-deploy=false" >> $GITHUB_OUTPUT
             fi
           else
-            echo "version-changed=true" >> $GITHUB_OUTPUT
-            echo "new-version=$current_version" >> $GITHUB_OUTPUT
-            echo "📦 ${{ matrix.module }}: 첫 번째 배포 ($current_version)"
+            echo "❌ pyproject.toml 파일을 찾을 수 없습니다."
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Git 태그 생성
-        if: steps.version-check.outputs.version-changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}" -m "${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
-          git push origin "${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}"
-          echo "🏷️ 태그 생성: ${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}"
-      
-      - name: PyPI 배포
-        if: steps.version-check.outputs.version-changed == 'true'
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: PyPI에 배포
+        if: steps.version-check.outputs.should-deploy == 'true'
         run: |
           cd packages/${{ matrix.module }}
-          
-          # pyproject.toml에서 실제 패키지명 추출 (toml 모듈 없이)
-          package_name=$(grep -E '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/' | tr -d '"')
-          echo "📦 실제 패키지명: $package_name"
-          
-          # 패키지명이 비어있으면 기본값 사용
-          if [ -z "$package_name" ]; then
-            package_name="yeonjae-${{ matrix.module }}"
-            echo "⚠️ 패키지명 추출 실패, 기본값 사용: $package_name"
-          fi
-          
-          if [ -n "${{ secrets.PYPI_API_TOKEN }}" ]; then
-            echo "🚀 PyPI 배포 시작: $package_name v${{ steps.version-check.outputs.new-version }}"
-            
-            # 실제 배포 전 검증
-            echo "📋 패키지 검증 중..."
-            if ! twine check dist/*; then
-              echo "❌ 패키지 검증 실패!"
-              exit 1
-            fi
-            echo "✅ 패키지 검증 완료"
-            
-            # 기존 버전 확인 (선택사항)
-            echo "🔍 기존 버전 확인 중..."
-            existing_version=$(pip index versions $package_name 2>/dev/null | grep "Available versions:" | head -1 || echo "신규 패키지")
-            echo "기존 버전: $existing_version"
-            
-            # 실제 배포
-            echo "🚀 PyPI 업로드 시작..."
-            if twine upload dist/* --verbose --skip-existing; then
-              echo "✅ PyPI 배포 완료: https://pypi.org/project/$package_name/"
-            else
-              echo "❌ PyPI 배포 실패!"
-              exit 1
-            fi
-          else
-            echo "⚠️ PYPI_API_TOKEN이 설정되지 않아 배포를 건너뜁니다."
-            echo "📦 패키지 검증만 수행합니다:"
-            twine check dist/*
-            echo "배포 시뮬레이션: $package_name v${{ steps.version-check.outputs.new-version }}"
-          fi
-      
-      - name: GitHub Release 생성
-        if: steps.version-check.outputs.version-changed == 'true'
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}
-          name: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
-          body: |
-            ## ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
-            
-            🚀 **자동 배포된 릴리스입니다.**
-            
-            ### 📦 설치 방법
-            ```bash
-            # 실제 패키지명으로 설치 (yeonjae- 접두사 포함)
-            pip install yeonjae-${{ matrix.module }}==${{ steps.version-check.outputs.new-version }}
-            ```
-            
-            ### 📚 문서
-            - [기술명세서](https://github.com/${{ github.repository }}/blob/main/packages/${{ matrix.module }}/docs/technical-specification.md)
-            - [PyPI 페이지](https://pypi.org/project/yeonjae-${{ matrix.module }}/)
-            
-            ### 🔗 링크
-            - [GitHub Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - [전체 변경사항](https://github.com/${{ github.repository }}/compare/${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}...main)
-          draft: false
-          prerelease: false
+          pip install twine
+          python -m twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --skip-existing
+          echo "🚀 ${{ steps.version-check.outputs.package-name }} v${{ steps.version-check.outputs.version }} PyPI 배포 완료"
 
   # 알림
-  notify:
-    name: "배포 알림"
+  notification:
+    name: "알림"
     runs-on: ubuntu-latest
-    needs: [detect-changes, quality-check, test, build, documentation, docs-consolidate, deploy]
-    if: always()
+    needs: [detect-changes, quality-check, test, build, documentation, deploy]
+    if: always() && needs.detect-changes.outputs.has-changes == 'true'
     
     steps:
-      - name: 변경사항 없음 알림
-        if: needs.detect-changes.outputs.has-changes == 'false'
-        run: |
-          echo "📄 변경된 모듈이 없어 배포를 건너뜁니다."
-
-      - name: 배포 성공 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'success'
+      - name: 성공 알림
+        if: needs.deploy.result == 'success'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -514,7 +353,7 @@ jobs:
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": "🚀 배포 완료"
+                      "text": "🚀 배포 성공"
                     }
                   },
                   {
@@ -545,60 +384,9 @@ jobs:
                         "type": "button",
                         "text": {
                           "type": "plain_text",
-                          "text": "GitHub Actions 보기"
+                          "text": "PyPI에서 확인하기"
                         },
-                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                      },
-                      {
-                        "type": "button",
-                        "text": {
-                          "type": "plain_text",
-                          "text": "PyPI 확인"
-                        },
-                        "url": "https://pypi.org/search/?q=yeonjae"
-                      }
-                    ]
-                  }
-                ]
-              }' \
-              ${{ secrets.SLACK_WEBHOOK_URL }}
-          else
-            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
-          fi
-
-      - name: 코드 품질 검사 실패 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.quality-check.result == 'failure'
-        run: |
-          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
-            curl -X POST -H 'Content-type: application/json' \
-              --data '{
-                "text": "⚠️ Universal Modules 코드 품질 검사 실패!",
-                "blocks": [
-                  {
-                    "type": "header",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "⚠️ 코드 품질 검사 실패"
-                    }
-                  },
-                  {
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
-                    }
-                  },
-                  {
-                    "type": "actions",
-                    "elements": [
-                      {
-                        "type": "button",
-                        "text": {
-                          "type": "plain_text",
-                          "text": "품질 검사 로그 보기"
-                        },
-                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                        "style": "primary"
+                        "url": "https://pypi.org/user/yeonjae0901/"
                       }
                     ]
                   }
@@ -610,7 +398,7 @@ jobs:
           fi
 
       - name: 테스트 실패 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.test.result == 'failure'
+        if: needs.test.result == 'failure'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -653,7 +441,7 @@ jobs:
           fi
 
       - name: 빌드 실패 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.build.result == 'failure'
+        if: needs.build.result == 'failure'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -696,7 +484,7 @@ jobs:
           fi
 
       - name: 문서 업데이트 실패 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.documentation.result == 'failure'
+        if: needs.documentation.result == 'failure'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -739,7 +527,7 @@ jobs:
           fi
 
       - name: 배포 실패 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'failure'
+        if: needs.deploy.result == 'failure'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -796,7 +584,7 @@ jobs:
           fi
 
       - name: 전체 워크플로우 성공 알림
-        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'skipped' && !contains(needs.*.result, 'failure')
+        if: needs.deploy.result == 'skipped' && !contains(needs.*.result, 'failure')
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
