@@ -404,10 +404,17 @@ jobs:
           cd packages/${{ matrix.module }}
           if [ -n "${{ secrets.PYPI_API_TOKEN }}" ]; then
             echo "🚀 PyPI 배포 시작: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
+            # 실제 배포 전 검증
+            twine check dist/*
+            echo "📦 패키지 검증 완료"
+            
+            # 실제 배포
             twine upload dist/* --verbose
             echo "✅ PyPI 배포 완료: https://pypi.org/project/universal-${{ matrix.module }}/"
           else
             echo "⚠️ PYPI_API_TOKEN이 설정되지 않아 배포를 건너뜁니다."
+            echo "📦 패키지 검증만 수행합니다:"
+            twine check dist/*
             echo "배포 시뮬레이션: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
           fi
       
