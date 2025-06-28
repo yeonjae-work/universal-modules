@@ -45,7 +45,16 @@ from .exceptions import (
     StructuralAnalysisError, ASTParsingError, BinaryFileAnalysisError,
     LargeFileAnalysisError
 )
-from shared.utils.logging import ModuleIOLogger
+# Simplified logging for standalone operation
+class ModuleIOLogger:
+    def __init__(self, module_name: str):
+        self.module_name = module_name
+    
+    def log_input(self, operation: str, data: dict):
+        pass
+    
+    def log_output(self, operation: str, result: dict):
+        pass
 
 logger = logging.getLogger(__name__)
 

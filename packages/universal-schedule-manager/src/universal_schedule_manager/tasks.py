@@ -13,7 +13,9 @@ from universal_llm_service import LLMService, LLMInput, LLMProvider, ModelConfig
 from modules.data_aggregator.service import DataAggregatorService
 from modules.prompt_builder.service import PromptBuilderService
 from universal_notification_service import NotificationService
-from shared.utils.logging import log_module_io
+# Simplified logging for standalone operation
+def log_module_io(module_name: str, operation: str, data: dict):
+    pass
 
 logger = logging.getLogger(__name__)
 

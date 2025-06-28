@@ -8,13 +8,14 @@ from enum import Enum
 
 from sqlalchemy import (
     Column, String, DateTime, LargeBinary, Integer, 
-    UniqueConstraint, ForeignKey, Text, Index
+    UniqueConstraint, ForeignKey, Text, Index, create_engine
 )
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from pydantic import BaseModel, ConfigDict
 
-from shared.config.database import Base
+# SQLAlchemy Base 독립적으로 생성
+Base = declarative_base()
 
 
 class StorageStatus(str, Enum):

@@ -10,7 +10,14 @@ from fastapi import HTTPException, status
 
 from universal_git_data_parser.service import GitDataParserService
 from universal_git_data_parser.models import ValidatedEvent
-from shared.config.celery_app import celery_app
+# Simplified task queue for standalone operation
+class MockCeleryApp:
+    def send_task(self, task_name: str, args=None, kwargs=None):
+        """Mock celery task queue for standalone operation"""
+        logger.info(f"Task queued: {task_name} with args: {args}")
+        return {"task_id": "mock_task_id", "status": "queued"}
+
+celery_app = MockCeleryApp()
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,20 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from shared.config.settings import Settings, get_settings
+# Simplified settings for standalone operation
+from pydantic_settings import BaseSettings
+from typing import Optional
+
+class Settings(BaseSettings):
+    app_name: str = "Universal Webhook Receiver"
+    debug: bool = False
+    secret_key: str = "dev-secret-key"
+    
+    class Config:
+        env_file = ".env"
+
+def get_settings() -> Settings:
+    return Settings()
 from universal_git_data_parser.models import ValidatedEvent
 from modules.webhook_receiver.service import WebhookService
 

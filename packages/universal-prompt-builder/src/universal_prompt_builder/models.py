@@ -17,6 +17,8 @@ class PromptType(str, Enum):
     WORK_PATTERN_ANALYSIS = "work_pattern_analysis"
     TEAM_REPORT = "team_report"
     PERFORMANCE_ANALYSIS = "performance_analysis"
+    COMMIT_SUMMARY = "commit_summary"
+    BUG_ANALYSIS = "bug_analysis"
 
 
 class CustomizationOptions(BaseModel):
@@ -116,6 +118,40 @@ class TokenUsage(BaseModel):
     def is_within_limit(self) -> bool:
         """토큰 제한 내 여부"""
         return self.total_tokens <= 4000  # 기본 제한값
+
+
+class PromptVariable(BaseModel):
+    """프롬프트 변수"""
+    name: str = Field(..., description="변수 이름")
+    value: str = Field(..., description="변수 값")
+    variable_type: str = Field(default="string", description="변수 타입")
+    required: bool = Field(default=True, description="필수 여부")
+    
+    
+class PromptRequest(BaseModel):
+    """프롬프트 요청"""
+    prompt_type: PromptType = Field(..., description="프롬프트 타입")
+    template_id: str = Field(..., description="템플릿 ID")
+    variables: Dict[str, Any] = Field(default_factory=dict, description="템플릿 변수들")
+    options: Optional[CustomizationOptions] = Field(default=None, description="커스터마이징 옵션")
+
+
+class PromptResponse(BaseModel):
+    """프롬프트 응답"""
+    prompt: str = Field(..., description="생성된 프롬프트")
+    success: bool = Field(..., description="성공 여부")
+    error_message: Optional[str] = Field(None, description="에러 메시지")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="메타데이터")
+
+
+class BuiltPrompt(BaseModel):
+    """빌드된 프롬프트"""
+    prompt_type: PromptType = Field(..., description="프롬프트 타입")
+    content: str = Field(..., description="프롬프트 내용")
+    template_name: str = Field(..., description="템플릿 이름")
+    variables_used: Dict[str, Any] = Field(default_factory=dict, description="사용된 변수들")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="메타데이터")
+    token_count: int = Field(default=0, description="토큰 수")
 
 
 class ContextData(BaseModel):

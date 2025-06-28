@@ -41,6 +41,72 @@ class FileType(Enum):
     DOCUMENTATION = "documentation"
     BINARY = "binary"
     UNKNOWN = "unknown"
+    PYTHON = "python"
+    JAVASCRIPT = "javascript"
+    TYPESCRIPT = "typescript"
+
+
+@dataclass
+class DiffLine:
+    """Diff 라인 정보"""
+    line_number: int
+    content: str
+    change_type: str  # ChangeType enum이 아닌 문자열로 변경
+    
+    def __post_init__(self):
+        if self.line_number < 0:
+            raise ValueError("Line number must be non-negative")
+
+
+@dataclass
+class CodeComplexity:
+    """코드 복잡도 정보"""
+    cyclomatic_complexity: float = 0.0
+    cognitive_complexity: float = 0.0
+    maintainability_index: float = 0.0
+    lines_of_code: int = 0
+    
+    def __post_init__(self):
+        if self.lines_of_code < 0:
+            raise ValueError("Lines of code must be non-negative")
+
+
+class FileChange(BaseModel):
+    """파일 변경 정보"""
+    file_path: str
+    filename: str  # 테스트에서 필요한 필드 추가
+    status: str    # 테스트에서 필요한 필드 추가
+    change_type: ChangeType
+    file_type: FileType
+    additions: int = 0
+    deletions: int = 0
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnalysisResult(BaseModel):
+    """분석 결과"""
+    file_path: str
+    language: str
+    complexity: CodeComplexity
+    lines_analyzed: int = 0
+    analysis_time: float = 0.0
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
+
+
+class DiffAnalysis(BaseModel):
+    """Diff 분석 결과"""
+    commit_hash: str
+    repository: str
+    total_files: int = 0
+    total_lines: int = 0
+    risk_score: float = 0.0
+    
+    model_config = ConfigDict(from_attributes=True)
 
 
 @dataclass

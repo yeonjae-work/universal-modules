@@ -10,6 +10,24 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
+class ScheduleType(str, Enum):
+    """스케줄 타입"""
+    CRON = "cron"
+    INTERVAL = "interval"
+    ONE_TIME = "one_time"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    CUSTOM = "custom"
+
+
+class ScheduleStatus(str, Enum):
+    """스케줄 상태"""
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    PAUSED = "paused"
+
+
 class JobStatus(str, Enum):
     """작업 상태"""
     SCHEDULED = "scheduled"
@@ -21,10 +39,8 @@ class JobStatus(str, Enum):
 
 class ScheduleConfig(BaseModel):
     """스케줄 설정"""
-    schedule_time: str = Field(default="0 8 * * *", description="cron 형식의 스케줄 시간")
-    job_id: str = Field(..., description="작업 고유 식별자")
-    function_name: str = Field(..., description="실행할 함수명")
-    job_args: Dict[str, Any] = Field(default_factory=dict, description="함수 실행 인자")
+    schedule_type: ScheduleType = Field(..., description="스케줄 타입")
+    expression: str = Field(..., description="스케줄 표현식 (cron, interval 등)")
     timezone: str = Field(default="Asia/Seoul", description="시간대 설정")
     max_instances: int = Field(default=1, description="최대 동시 실행 인스턴스 수")
     replace_existing: bool = Field(default=True, description="기존 작업 교체 여부")
@@ -95,6 +111,35 @@ class DailyReportRequest(BaseModel):
     include_statistics: bool = Field(default=True, description="통계 포함 여부")
     developer_filters: Optional[List[str]] = Field(None, description="개발자 필터")
     repository_filters: Optional[List[str]] = Field(None, description="저장소 필터")
+
+
+class ScheduleRequest(BaseModel):
+    """스케줄 요청"""
+    name: str = Field(..., description="스케줄 이름")
+    description: str = Field(..., description="스케줄 설명")
+    schedule_config: ScheduleConfig = Field(..., description="스케줄 설정")
+    job_data: Dict[str, Any] = Field(default_factory=dict, description="작업 데이터")
+    enabled: bool = Field(default=True, description="활성화 여부")
+
+
+class ScheduleResponse(BaseModel):
+    """스케줄 응답"""
+    schedule_id: str = Field(..., description="스케줄 ID")
+    name: str = Field(..., description="스케줄 이름")
+    status: ScheduleStatus = Field(..., description="스케줄 상태")
+    next_run_time: Optional[datetime] = Field(None, description="다음 실행 시간")
+    created_at: datetime = Field(..., description="생성 시간")
+    updated_at: datetime = Field(..., description="수정 시간")
+
+
+class JobExecution(BaseModel):
+    """작업 실행"""
+    job_id: str = Field(..., description="작업 ID")
+    schedule_id: str = Field(..., description="스케줄 ID")
+    started_at: datetime = Field(..., description="시작 시간")
+    ended_at: Optional[datetime] = Field(None, description="종료 시간")
+    status: str = Field(..., description="실행 상태")
+    result: Optional[Dict[str, Any]] = Field(None, description="실행 결과")
 
 
 class WeeklySummaryRequest(BaseModel):

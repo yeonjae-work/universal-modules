@@ -12,6 +12,15 @@ from pydantic import BaseModel, Field, validator
 from typing_extensions import Literal
 
 
+class AggregationType(str, Enum):
+    """집계 타입"""
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    DEVELOPER = "developer"
+    REPOSITORY = "repository"
+
+
 class DiffType(str, Enum):
     """Diff 변경 타입"""
     ADDED = "added"
@@ -178,6 +187,26 @@ class AggregationResult(BaseModel):
     def total_repositories(self) -> int:
         """관련 저장소 수"""
         return len(self.repository_stats)
+
+
+class AggregationRequest(BaseModel):
+    """집계 요청"""
+    aggregation_type: AggregationType = Field(..., description="집계 타입")
+    date_range: DateRange = Field(..., description="날짜 범위")
+    developer_filter: Optional[List[str]] = Field(None, description="개발자 필터")
+    repository_filter: Optional[List[str]] = Field(None, description="저장소 필터")
+    include_complexity: bool = Field(True, description="복잡도 포함 여부")
+
+
+class DeveloperSummary(BaseModel):
+    """개발자 요약"""
+    developer_email: str = Field(..., description="개발자 이메일")
+    developer_name: str = Field(..., description="개발자 이름")
+    total_commits: int = Field(0, description="총 커밋 수")
+    total_lines_added: int = Field(0, description="총 추가 라인")
+    total_lines_deleted: int = Field(0, description="총 삭제 라인")
+    active_days: int = Field(0, description="활동 일수")
+    repositories: List[str] = Field(default_factory=list, description="참여 저장소")
 
 
 class CacheKey(BaseModel):

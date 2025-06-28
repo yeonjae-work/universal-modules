@@ -48,6 +48,16 @@ class InvalidScheduleConfigException(ScheduleManagerException):
         })
 
 
+class InvalidScheduleException(ScheduleManagerException):
+    """잘못된 스케줄 예외"""
+    def __init__(self, schedule_type: str, expression: str):
+        message = f"Invalid schedule type '{schedule_type}' with expression '{expression}'"
+        super().__init__(message, {
+            "schedule_type": schedule_type,
+            "expression": expression
+        })
+
+
 class DataRetrievalException(ScheduleManagerException):
     """데이터 조회 중 오류가 발생한 경우"""
     def __init__(self, operation: str, error: Exception):

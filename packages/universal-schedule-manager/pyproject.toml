@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "yeonjae-universal-prompt-builder"
+name = "yeonjae-universal-schedule-manager"
 version = "1.0.1"
-description = "Universal prompt builder module for creating dynamic prompts"
+description = "Universal schedule manager module for job scheduling and execution"
 authors = [{name = "Yeonjae", email = "dev@example.com"}]
 license = {text = "MIT"}
 readme = "README.md"
@@ -22,7 +22,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.0.0",
-    "jinja2>=3.0.0",
+    "croniter>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -45,7 +45,7 @@ Issues = "https://github.com/yeonjae/universal-modules/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-universal_prompt_builder = ["py.typed"]
+universal_schedule_manager = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -55,7 +55,7 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["src/universal_prompt_builder"]
+source = ["src/universal_schedule_manager"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

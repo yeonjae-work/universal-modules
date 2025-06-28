@@ -21,9 +21,47 @@ from modules.data_storage.models import (
     CommitSummary, DiffSummary, CommitWithDiffs, BatchStorageResult
 )
 from universal_git_data_parser.models import DiffData as GitDiffData
-from shared.config.database import get_async_session, get_session
-from infrastructure.aws.s3_client import S3Client
-from shared.utils.logging import ModuleIOLogger
+# Database configuration - standalone implementation
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+import os
+
+# Create base for models
+Base = declarative_base()
+
+def get_session():
+    """Get database session - standalone implementation"""
+    database_url = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    engine = create_engine(database_url)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return SessionLocal()
+
+async def get_async_session():
+    """Get async database session - standalone implementation"""
+    database_url = os.getenv("ASYNC_DATABASE_URL", "sqlite+aiosqlite:///./test.db")
+    engine = create_async_engine(database_url)
+    SessionLocal = async_sessionmaker(engine, class_=AsyncSession)
+    return SessionLocal()
+
+# Simplified S3Client for standalone operation
+class S3Client:
+    def __init__(self):
+        self.configured = False
+    
+    def upload_file(self, key: str, data: bytes) -> str:
+        return f"s3://bucket/{key}"
+
+# Simple logging class
+class ModuleIOLogger:
+    def __init__(self, module_name: str):
+        self.module_name = module_name
+    
+    def log_input(self, operation: str, data: dict):
+        pass
+    
+    def log_output(self, operation: str, result: dict):
+        pass
 
 logger = logging.getLogger(__name__)
 

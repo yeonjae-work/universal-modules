@@ -1,119 +1,79 @@
 """
-DiffAnalyzer 모듈 예외 정의
+Universal Diff Analyzer 예외 클래스
 
-모듈별 구체적인 예외를 정의하여 정확한 오류 처리와 디버깅을 지원합니다.
+Diff 분석과 관련된 예외들을 정의합니다.
 """
 
-from typing import Optional, Dict, List, Any
+from typing import Dict, Any, Optional
 
 
-class DiffAnalyzerError(Exception):
-    """DiffAnalyzer 모듈의 기본 예외 클래스"""
+class DiffAnalyzerException(Exception):
+    """Diff 분석 관련 기본 예외 클래스"""
     
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
-        super().__init__(message)
         self.message = message
         self.details = details or {}
+        super().__init__(self.message)
 
 
-class LanguageNotSupportedError(DiffAnalyzerError):
-    """지원하지 않는 프로그래밍 언어 오류"""
+class InvalidDiffFormatException(DiffAnalyzerException):
+    """잘못된 Diff 형식 예외"""
     
-    def __init__(self, language: str, supported_languages: Optional[List[str]] = None):
-        message = f"Language '{language}' is not supported for analysis"
+    def __init__(self, reason: str, diff_content: str):
+        message = f"Invalid diff format: {reason}"
         details = {
-            "language": language,
-            "supported_languages": supported_languages or []
+            "reason": reason,
+            "diff_content": diff_content
         }
         super().__init__(message, details)
-        self.language = language
-        self.supported_languages = supported_languages
 
 
-class ComplexityAnalysisError(DiffAnalyzerError):
-    """코드 복잡도 분석 오류"""
+class AnalysisException(DiffAnalyzerException):
+    """분석 작업 예외"""
     
-    def __init__(self, message: str, file_path: Optional[str] = None, 
-                 language: Optional[str] = None, code_size: Optional[int] = None):
+    def __init__(self, analysis_type: str, original_error: Exception):
+        message = f"Analysis failed for type '{analysis_type}'"
         details = {
-            "file_path": file_path,
-            "language": language,
-            "code_size": code_size
+            "analysis_type": analysis_type,
+            "error_type": type(original_error).__name__,
+            "error_message": str(original_error)
         }
         super().__init__(message, details)
-        self.file_path = file_path
-        self.language = language
 
 
-class StructuralAnalysisError(DiffAnalyzerError):
-    """구조적 변경사항 분석 오류"""
+class ComplexityCalculationException(DiffAnalyzerException):
+    """복잡도 계산 예외"""
     
-    def __init__(self, message: str, file_path: Optional[str] = None,
-                 analysis_type: Optional[str] = None):
+    def __init__(self, file_path: str, original_error: Exception):
+        message = f"Complexity calculation failed for file: {file_path}"
         details = {
             "file_path": file_path,
-            "analysis_type": analysis_type
+            "error_type": type(original_error).__name__,
+            "error_message": str(original_error)
         }
         super().__init__(message, details)
-        self.file_path = file_path
-        self.analysis_type = analysis_type
 
 
-class ASTParsingError(DiffAnalyzerError):
-    """AST 파싱 오류"""
+class FileTypeDetectionException(DiffAnalyzerException):
+    """파일 타입 감지 예외"""
     
-    def __init__(self, message: str, file_path: Optional[str] = None,
-                 language: Optional[str] = None, syntax_error: Optional[str] = None):
+    def __init__(self, file_path: str, reason: str):
+        message = f"File type detection failed for '{file_path}': {reason}"
         details = {
             "file_path": file_path,
-            "language": language,
-            "syntax_error": syntax_error
+            "reason": reason
         }
         super().__init__(message, details)
-        self.file_path = file_path
-        self.language = language
-        self.syntax_error = syntax_error
 
 
-class BinaryFileAnalysisError(DiffAnalyzerError):
-    """바이너리 파일 분석 오류"""
+class RiskAssessmentException(DiffAnalyzerException):
+    """위험도 평가 예외"""
     
-    def __init__(self, file_path: str, file_size: Optional[int] = None):
-        message = f"Cannot analyze binary file: {file_path}"
+    def __init__(self, commit_hash: str, original_error: Exception):
+        message = f"Risk assessment failed for commit: {commit_hash}"
         details = {
-            "file_path": file_path,
-            "file_size": file_size,
-            "file_type": "binary"
+            "commit_hash": commit_hash,
+            "error_type": type(original_error).__name__,
+            "error_message": str(original_error)
         }
-        super().__init__(message, details)
-        self.file_path = file_path
-
-
-class LargeFileAnalysisError(DiffAnalyzerError):
-    """대용량 파일 분석 제한 오류"""
-    
-    def __init__(self, file_path: str, file_size: int, max_size: int):
-        message = f"File too large for analysis: {file_path} ({file_size} bytes, max: {max_size})"
-        details = {
-            "file_path": file_path,
-            "file_size": file_size,
-            "max_size": max_size
-        }
-        super().__init__(message, details)
-        self.file_path = file_path
-        self.file_size = file_size
-        self.max_size = max_size
-
-
-class DependencyAnalysisError(DiffAnalyzerError):
-    """의존성 분석 오류"""
-    
-    def __init__(self, message: str, dependency_type: Optional[str] = None,
-                 missing_dependencies: Optional[List[str]] = None):
-        details = {
-            "dependency_type": dependency_type,
-            "missing_dependencies": missing_dependencies or []
-        }
-        super().__init__(message, details)
-        self.dependency_type = dependency_type
-        self.missing_dependencies = missing_dependencies 
+        super().__init__(message, details) 

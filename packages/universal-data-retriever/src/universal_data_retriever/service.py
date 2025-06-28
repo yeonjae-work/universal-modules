@@ -16,8 +16,40 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy import select, func, and_, or_, text
 from sqlalchemy.orm import Session
 
-from shared.config.database import get_session
-from modules.data_storage.models import Event
+# Database configuration - standalone implementation
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.engine import Engine
+import os
+
+# Create base for models
+Base = declarative_base()
+
+def get_session():
+    """Get database session - standalone implementation"""
+    database_url = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    engine = create_engine(database_url)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return SessionLocal()
+
+# Simplified Event model for standalone operation
+from sqlalchemy import Column, Integer, String, DateTime, Text
+from datetime import datetime
+
+class Event(Base):
+    __tablename__ = "events"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    pusher = Column(String, index=True)
+    author_email = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    commit_sha = Column(String)
+    payload = Column(Text)
+    ref = Column(String)
+    repository = Column(String)
+    files_changed = Column(Integer, default=0)
+    added_lines = Column(Integer, default=0)
+    deleted_lines = Column(Integer, default=0)
 
 from .models import (
     QueryParams,

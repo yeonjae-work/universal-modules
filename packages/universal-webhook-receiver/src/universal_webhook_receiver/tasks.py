@@ -15,11 +15,17 @@ from universal_git_data_parser.models import DiffData, ParsedWebhookData
 from universal_http_api_client import HTTPAPIClient, Platform
 from modules.diff_analyzer.service import DiffAnalyzer
 from modules.data_storage.service import LegacyDataStorageService
-from shared.config.settings import get_settings
-from shared.utils.logging import (
-    log_module_io, log_processing_chain_start, log_processing_chain_end,
-    default_json_serializer, simplify_data
-)
+# Simplified settings and logging for standalone operation
+def get_settings():
+    class Settings:
+        github_token = None
+    return Settings()
+
+def log_processing_chain_start(payload, headers):
+    pass
+
+def log_processing_chain_end(result):
+    pass
 
 logger = logging.getLogger(__name__)
 
