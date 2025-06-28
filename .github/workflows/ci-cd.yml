@@ -241,7 +241,16 @@ jobs:
       - name: 문서 업데이트 스크립트 실행
         run: |
           if [ -f "scripts/update-documentation.py" ]; then
-            python scripts/update-documentation.py
+            # 변경된 모듈들에 대해 문서 업데이트
+            changed_modules="${{ needs.detect-changes.outputs.changed-modules }}"
+            if [ -n "$changed_modules" ]; then
+              for module in $changed_modules; do
+                echo "📝 $module 모듈 문서 업데이트 중..."
+                python scripts/update-documentation.py "$module" --save || echo "⚠️ $module 문서 업데이트 실패"
+              done
+            else
+              echo "📄 변경된 모듈이 없습니다."
+            fi
             echo "📚 문서 업데이트 완료"
           else
             echo "📚 문서 업데이트 스크립트를 찾을 수 없습니다."
