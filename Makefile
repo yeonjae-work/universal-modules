@@ -23,7 +23,7 @@ BANDIT := $(PYTHON) -m bandit
 SAFETY := $(PYTHON) -m safety
 
 # 패키지 목록
-PACKAGES := git-data-parser http-api-client llm-service notification-service notion-sync
+PACKAGES := yeonjae-universal-git-data-parser yeonjae-universal-http-api-client yeonjae-universal-llm-service yeonjae-universal-notification-service yeonjae-universal-notion-sync yeonjae-universal-data-aggregator yeonjae-universal-data-retriever yeonjae-universal-data-storage yeonjae-universal-diff-analyzer yeonjae-universal-prompt-builder yeonjae-universal-schedule-manager yeonjae-universal-webhook-receiver
 
 help: ## 도움말 표시
 	@echo "$(BLUE)Universal Modules 개발 도구$(NC)"

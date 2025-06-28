@@ -555,7 +555,7 @@ jobs:
                           "type": "plain_text",
                           "text": "PyPI 확인"
                         },
-                        "url": "https://pypi.org/search/?q=universal"
+                        "url": "https://pypi.org/search/?q=yeonjae"
                       }
                     ]
                   }

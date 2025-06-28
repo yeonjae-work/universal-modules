@@ -20,11 +20,18 @@
 
 | 모듈 | 설명 | 버전 | PyPI |
 |------|------|------|------|
-| [git-data-parser](packages/git-data-parser/) | Git 데이터 파싱 및 분석 | ![Version](https://img.shields.io/pypi/v/universal-git-data-parser) | [![PyPI](https://img.shields.io/pypi/dm/universal-git-data-parser)](https://pypi.org/project/universal-git-data-parser/) |
-| [http-api-client](packages/http-api-client/) | 범용 HTTP API 클라이언트 | ![Version](https://img.shields.io/pypi/v/universal-http-api-client) | [![PyPI](https://img.shields.io/pypi/dm/universal-http-api-client)](https://pypi.org/project/universal-http-api-client/) |
-| [llm-service](packages/llm-service/) | LLM 통합 서비스 | ![Version](https://img.shields.io/pypi/v/universal-llm-service) | [![PyPI](https://img.shields.io/pypi/dm/universal-llm-service)](https://pypi.org/project/universal-llm-service/) |
-| [notification-service](packages/notification-service/) | 멀티 채널 알림 서비스 | ![Version](https://img.shields.io/pypi/v/universal-notification-service) | [![PyPI](https://img.shields.io/pypi/dm/universal-notification-service)](https://pypi.org/project/universal-notification-service/) |
-| [notion-sync](packages/notion-sync/) | Notion 동기화 엔진 | ![Version](https://img.shields.io/pypi/v/universal-notion-sync) | [![PyPI](https://img.shields.io/pypi/dm/universal-notion-sync)](https://pypi.org/project/universal-notion-sync/) |
+| [git-data-parser](packages/yeonjae-universal-git-data-parser/) | Git 데이터 파싱 및 분석 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-git-data-parser) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-git-data-parser)](https://pypi.org/project/yeonjae-universal-git-data-parser/) |
+| [http-api-client](packages/yeonjae-universal-http-api-client/) | 범용 HTTP API 클라이언트 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-http-api-client) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-http-api-client)](https://pypi.org/project/yeonjae-universal-http-api-client/) |
+| [llm-service](packages/yeonjae-universal-llm-service/) | LLM 통합 서비스 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-llm-service) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-llm-service)](https://pypi.org/project/yeonjae-universal-llm-service/) |
+| [notification-service](packages/yeonjae-universal-notification-service/) | 멀티 채널 알림 서비스 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-notification-service) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-notification-service)](https://pypi.org/project/yeonjae-universal-notification-service/) |
+| [notion-sync](packages/yeonjae-universal-notion-sync/) | Notion 동기화 엔진 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-notion-sync) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-notion-sync)](https://pypi.org/project/yeonjae-universal-notion-sync/) |
+| [data-aggregator](packages/yeonjae-universal-data-aggregator/) | 데이터 수집 및 집계 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-data-aggregator) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-data-aggregator)](https://pypi.org/project/yeonjae-universal-data-aggregator/) |
+| [data-retriever](packages/yeonjae-universal-data-retriever/) | 데이터 검색 및 조회 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-data-retriever) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-data-retriever)](https://pypi.org/project/yeonjae-universal-data-retriever/) |
+| [data-storage](packages/yeonjae-universal-data-storage/) | 데이터 저장 및 관리 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-data-storage) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-data-storage)](https://pypi.org/project/yeonjae-universal-data-storage/) |
+| [diff-analyzer](packages/yeonjae-universal-diff-analyzer/) | 차이점 분석 및 비교 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-diff-analyzer) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-diff-analyzer)](https://pypi.org/project/yeonjae-universal-diff-analyzer/) |
+| [prompt-builder](packages/yeonjae-universal-prompt-builder/) | 프롬프트 생성 및 관리 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-prompt-builder) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-prompt-builder)](https://pypi.org/project/yeonjae-universal-prompt-builder/) |
+| [schedule-manager](packages/yeonjae-universal-schedule-manager/) | 스케줄 관리 및 실행 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-schedule-manager) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-schedule-manager)](https://pypi.org/project/yeonjae-universal-schedule-manager/) |
+| [webhook-receiver](packages/yeonjae-universal-webhook-receiver/) | 웹훅 수신 및 처리 | ![Version](https://img.shields.io/pypi/v/yeonjae-universal-webhook-receiver) | [![PyPI](https://img.shields.io/pypi/dm/yeonjae-universal-webhook-receiver)](https://pypi.org/project/yeonjae-universal-webhook-receiver/) |
 
 ## 🚀 빠른 시작
 
@@ -42,11 +49,18 @@ pip install universal-modules[dev,docs]
 
 ```bash
 # 특정 모듈만 설치
-pip install universal-git-data-parser
-pip install universal-http-api-client
-pip install universal-llm-service
-pip install universal-notification-service
-pip install universal-notion-sync
+pip install yeonjae-universal-git-data-parser
+pip install yeonjae-universal-http-api-client
+pip install yeonjae-universal-llm-service
+pip install yeonjae-universal-notification-service
+pip install yeonjae-universal-notion-sync
+pip install yeonjae-universal-data-aggregator
+pip install yeonjae-universal-data-retriever
+pip install yeonjae-universal-data-storage
+pip install yeonjae-universal-diff-analyzer
+pip install yeonjae-universal-prompt-builder
+pip install yeonjae-universal-schedule-manager
+pip install yeonjae-universal-webhook-receiver
 ```
 
 ### 기본 사용법
@@ -114,7 +128,7 @@ make quality
 make test
 
 # 특정 모듈 테스트
-make test-git-data-parser
+make test-yeonjae-universal-git-data-parser
 
 # 문서 생성
 make docs
@@ -197,7 +211,7 @@ make test-coverage
 make test-performance
 
 # 특정 모듈 테스트
-make test-notion-sync
+make test-yeonjae-universal-notion-sync
 ```
 
 ### 테스트 커버리지
@@ -215,11 +229,18 @@ make test-notion-sync
 
 각 모듈은 상세한 기술명세서를 제공합니다:
 
-- [git-data-parser 기술명세서](packages/git-data-parser/docs/technical-specification.md)
-- [http-api-client 기술명세서](packages/http-api-client/docs/technical-specification.md)
-- [llm-service 기술명세서](packages/llm-service/docs/technical-specification.md)
-- [notification-service 기술명세서](packages/notification-service/docs/technical-specification.md)
-- [notion-sync 기술명세서](packages/notion-sync/docs/technical-specification.md)
+- [git-data-parser 기술명세서](packages/yeonjae-universal-git-data-parser/docs/technical-specification.md)
+- [http-api-client 기술명세서](packages/yeonjae-universal-http-api-client/docs/technical-specification.md)
+- [llm-service 기술명세서](packages/yeonjae-universal-llm-service/docs/technical-specification.md)
+- [notification-service 기술명세서](packages/yeonjae-universal-notification-service/docs/technical-specification.md)
+- [notion-sync 기술명세서](packages/yeonjae-universal-notion-sync/docs/technical-specification.md)
+- [data-aggregator 기술명세서](packages/yeonjae-universal-data-aggregator/docs/technical-specification.md)
+- [data-retriever 기술명세서](packages/yeonjae-universal-data-retriever/docs/technical-specification.md)
+- [data-storage 기술명세서](packages/yeonjae-universal-data-storage/docs/technical-specification.md)
+- [diff-analyzer 기술명세서](packages/yeonjae-universal-diff-analyzer/docs/technical-specification.md)
+- [prompt-builder 기술명세서](packages/yeonjae-universal-prompt-builder/docs/technical-specification.md)
+- [schedule-manager 기술명세서](packages/yeonjae-universal-schedule-manager/docs/technical-specification.md)
+- [webhook-receiver 기술명세서](packages/yeonjae-universal-webhook-receiver/docs/technical-specification.md)
 
 ### API 문서
 

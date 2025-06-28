@@ -16,29 +16,57 @@
 
 ```
 packages/
-├── git-data-parser/docs/technical-specification.md
-├── http-api-client/docs/technical-specification.md  
-├── llm-service/docs/technical-specification.md
-├── notification-service/docs/technical-specification.md
-└── notion-sync/docs/technical-specification.md
+├── yeonjae-universal-git-data-parser/docs/technical-specification.md
+├── yeonjae-universal-http-api-client/docs/technical-specification.md  
+├── yeonjae-universal-llm-service/docs/technical-specification.md
+├── yeonjae-universal-notification-service/docs/technical-specification.md
+├── yeonjae-universal-notion-sync/docs/technical-specification.md
+├── yeonjae-universal-data-aggregator/docs/technical-specification.md
+├── yeonjae-universal-data-retriever/docs/technical-specification.md
+├── yeonjae-universal-data-storage/docs/technical-specification.md
+├── yeonjae-universal-diff-analyzer/docs/technical-specification.md
+├── yeonjae-universal-prompt-builder/docs/technical-specification.md
+├── yeonjae-universal-schedule-manager/docs/technical-specification.md
+└── yeonjae-universal-webhook-receiver/docs/technical-specification.md
 ```
 
 ## 🔗 모듈별 문서 링크
 
-### [Git Data Parser](../packages/git-data-parser/docs/technical-specification.md)
+### [Git Data Parser](../packages/yeonjae-universal-git-data-parser/docs/technical-specification.md)
 GitHub webhook 이벤트 파싱 및 diff 분석 모듈
 
-### [HTTP API Client](../packages/http-api-client/docs/technical-specification.md)  
+### [HTTP API Client](../packages/yeonjae-universal-http-api-client/docs/technical-specification.md)  
 다중 플랫폼 API 통합 클라이언트 모듈
 
-### [LLM Service](../packages/llm-service/docs/technical-specification.md)
+### [LLM Service](../packages/yeonjae-universal-llm-service/docs/technical-specification.md)
 다중 LLM 제공자 통합 서비스 모듈
 
-### [Notification Service](../packages/notification-service/docs/technical-specification.md)
+### [Notification Service](../packages/yeonjae-universal-notification-service/docs/technical-specification.md)
 다중 채널 알림 전송 서비스 모듈
 
-### [Notion Sync](../packages/notion-sync/docs/technical-specification.md)
+### [Notion Sync](../packages/yeonjae-universal-notion-sync/docs/technical-specification.md)
 Notion 데이터베이스 동기화 모듈
+
+### [Data Aggregator](../packages/yeonjae-universal-data-aggregator/docs/technical-specification.md)
+데이터 수집 및 집계 모듈
+
+### [Data Retriever](../packages/yeonjae-universal-data-retriever/docs/technical-specification.md)
+데이터 검색 및 조회 모듈
+
+### [Data Storage](../packages/yeonjae-universal-data-storage/docs/technical-specification.md)
+데이터 저장 및 관리 모듈
+
+### [Diff Analyzer](../packages/yeonjae-universal-diff-analyzer/docs/technical-specification.md)
+차이점 분석 및 비교 모듈
+
+### [Prompt Builder](../packages/yeonjae-universal-prompt-builder/docs/technical-specification.md)
+프롬프트 생성 및 관리 모듈
+
+### [Schedule Manager](../packages/yeonjae-universal-schedule-manager/docs/technical-specification.md)
+스케줄 관리 및 실행 모듈
+
+### [Webhook Receiver](../packages/yeonjae-universal-webhook-receiver/docs/technical-specification.md)
+웹훅 수신 및 처리 모듈
 
 ## 📋 문서 작성 가이드
 
