@@ -11,7 +11,7 @@ import logging
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, NamedTuple, Callable
 
 try:
     import tree_sitter_python as tspython
@@ -35,9 +35,7 @@ except ImportError:
     PYGMENTS_AVAILABLE = False
 
 from .models import (
-    DiffAnalysisResult, LanguageClassificationResult, ComplexityAnalysisResult,
-    StructuralAnalysisResult, AnalyzedFile, LanguageStats, FileAnalysis,
-    ComplexityMetrics, StructuralChanges, ParsedDiff, CommitMetadata,
+    DiffAnalysisResult, ComplexityMetrics, StructuralChanges, ParsedDiff, CommitMetadata,
     RepositoryContext, ImpactLevel, ChangeType, FileType
 )
 from .exceptions import (
