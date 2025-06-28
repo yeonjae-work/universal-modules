@@ -1,55 +1,44 @@
-# llm-service 기술명세서
+# yeonjae-universal-llm-service 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: llm-service
-- **버전**: v1.0.0
-- **최종 업데이트**: 2024-01-15
+- **모듈명**: yeonjae-universal-llm-service
+- **버전**: 1.0.1
+- **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
 
 ### 목적 및 책임
-OpenAI, Anthropic, 로컬 LLM 등 다양한 LLM을 통합 관리하는 범용 모듈입니다. 개발자별 코드 분석 및 요약 생성을 수행하며, AI-driven Modular Design 원칙에 따라 설계되어 다른 프로젝트에서도 독립적으로 사용할 수 있습니다.
+Universal LLM service supporting OpenAI, Anthropic, and local models for code analysis and summarization
 
 ### 핵심 기능
-- **다중 LLM 지원**: OpenAI, Anthropic, 로컬 LLM 통합 관리
-- **동적 제공자 전환**: 런타임에 LLM 제공자 변경 가능
-- **응답 품질 검증**: 생성된 응답의 품질 자동 검증
-- **토큰 사용량 추적**: 각 API 호출의 토큰 사용량 모니터링
-- **에러 핸들링**: 세분화된 예외 처리 및 복구 메커니즘
-- **비동기 처리**: asyncio 기반 비동기 API 호출
+- 기능 1: {설명}
+- 기능 2: {설명}
+- 기능 3: {설명}
 
 ## 🏗️ 아키텍처
 
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[Client Application] --> B[LLMService]
-    
-    B --> C[Provider Manager]
-    C --> D[OpenAI Provider]
-    C --> E[Anthropic Provider] 
-    C --> F[Local LLM Provider]
-    
-    B --> G[Response Validator]
-    B --> H[Metadata Tracker]
-    B --> I[Rate Limiter]
-    
-    D --> J[OpenAI API]
-    E --> K[Anthropic API]
-    F --> L[Local Model]
+    A[External Input] --> B[yeonjae-universal-llm-service]
+    B --> C[Core Service]
+    B --> D[Data Models]
+    B --> E[Exception Handling]
+    C --> F[External Output]
 ```
 
 ### 컴포넌트 구조
 ```
-llm-service/
+yeonjae-universal-llm-service/
 ├── src/
-│   └── universal_llm_service/
-│       ├── __init__.py          # 공개 API (LLMService, 모든 모델, 예외)
-│       ├── service.py           # 핵심 LLMService 클래스
-│       ├── models.py            # 데이터 모델 (LLMInput, LLMResult 등)
-│       ├── exceptions.py        # 예외 정의 (6가지 세분화된 예외)
+│   └── universal_yeonjae-universal-llm-service/
+│       ├── __init__.py          # 공개 API
+│       ├── models.py            # 데이터 모델
+│       ├── service.py           # 핵심 서비스
+│       ├── exceptions.py        # 예외 정의
+│       ├── utils.py            # 유틸리티
 │       └── py.typed            # 타입 지원
 ├── tests/                      # 테스트 코드
 ├── docs/                       # 문서
@@ -60,391 +49,289 @@ llm-service/
 ### 의존성 다이어그램
 ```mermaid
 graph LR
-    A[llm-service] --> B[asyncio]
-    A --> C[typing]
-    A --> D[logging]
+    A[모듈] --> B[pydantic]
+    A --> E[typing-extensions]
     
-    subgraph "외부 API (선택적)"
-        E[openai - OpenAI API]
-        F[anthropic - Anthropic API]
-    end
-    
-    subgraph "개발 의존성"
-        G[pytest - 테스트]
-        H[pytest-asyncio - 비동기 테스트]
-        I[pytest-cov - 커버리지]
+    subgraph "선택적 의존성"
+        E[dev dependencies]
+        F[platform specific]
     end
 ```
 
 ## 📚 사용 설명서
 
+
+
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-llm-service
-
-# OpenAI 지원 포함
-pip install universal-llm-service[openai]
-
-# Anthropic 지원 포함
-pip install universal-llm-service[anthropic]
-
-# 모든 제공자 지원
-pip install universal-llm-service[all]
+pip install universal-yeonjae-universal-llm-service
 
 # 개발 의존성 포함
-pip install universal-llm-service[dev]
+pip install universal-yeonjae-universal-llm-service[dev]
+
+# 모든 선택적 의존성 포함
+pip install universal-yeonjae-universal-llm-service[all]
 ```
 
 ### 기본 사용법
 ```python
-import asyncio
-from universal_llm_service import LLMService, LLMInput, LLMProvider
+from universal_yeonjae-universal-llm-service import MainService
 
-# 서비스 초기화
-llm_service = LLMService()
+# 기본 초기화
+service = MainService()
+
+# 주요 기능 사용
+result = service.main_function(input_data)
+```
+
+### 고급 사용법
+```python
+# 설정 커스터마이징
+config = YeonjaeUniversalLlmServiceConfig(
+    option1="value1",
+    option2="value2"
+)
+
+service = MainService(config=config)
+
+# 비동기 사용 (해당하는 경우)
+import asyncio
 
 async def main():
-    # 입력 데이터 준비
-    input_data = LLMInput(
-        prompt="다음 코드를 분석하고 개선점을 제안해주세요: def hello(): print('world')",
-        llm_provider=LLMProvider.OPENAI,
-        model_config={
-            "model": "gpt-3.5-turbo",
-            "temperature": 0.7,
-            "max_tokens": 500
-        }
-    )
-    
-    # LLM 요약 생성
-    result = await llm_service.generate_summary(input_data)
-    
-    print(f"생성된 요약: {result.summary}")
-    print(f"신뢰도: {result.confidence_score}")
-    print(f"응답 시간: {result.metadata.response_time}초")
-    print(f"토큰 사용량: {result.metadata.token_usage}")
+    result = await service.async_function(data)
+    return result
 
-# 실행
 asyncio.run(main())
-```
-
-### 제공자별 사용법
-```python
-# OpenAI 사용
-openai_input = LLMInput(
-    prompt="코드 리뷰를 해주세요",
-    llm_provider=LLMProvider.OPENAI,
-    model_config={"model": "gpt-4", "temperature": 0.5}
-)
-
-# Anthropic 사용
-anthropic_input = LLMInput(
-    prompt="코드 리뷰를 해주세요",
-    llm_provider=LLMProvider.ANTHROPIC,
-    model_config={"model": "claude-3-sonnet", "temperature": 0.5}
-)
-
-# 로컬 LLM 사용
-local_input = LLMInput(
-    prompt="코드 리뷰를 해주세요",
-    llm_provider=LLMProvider.LOCAL,
-    model_config={"model": "local-model"}
-)
-```
-
-### 고급 기능
-```python
-# 동적 제공자 전환
-llm_service.switch_provider(LLMProvider.ANTHROPIC)
-
-# 사용 가능한 제공자 확인
-available_providers = llm_service.get_available_providers()
-print(f"사용 가능한 제공자: {available_providers}")
-
-# 제공자 설정 확인
-is_configured = llm_service.is_provider_configured(LLMProvider.OPENAI)
-print(f"OpenAI 설정됨: {is_configured}")
-
-# 응답 품질 검증
-is_valid = llm_service.validate_response("생성된 응답 텍스트")
-print(f"응답 유효성: {is_valid}")
-
-# 에러 처리
-from universal_llm_service import (
-    UnsupportedProviderException, 
-    APICallFailedException,
-    ProviderNotConfiguredException
-)
-
-try:
-    result = await llm_service.generate_summary(input_data)
-except UnsupportedProviderException as e:
-    print(f"지원하지 않는 제공자: {e}")
-except APICallFailedException as e:
-    print(f"API 호출 실패: {e}")
-except ProviderNotConfiguredException as e:
-    print(f"제공자 설정 오류: {e}")
 ```
 
 ## 🔄 입력/출력 데이터 구조
 
 ### 입력 데이터 스키마
-
-#### LLMInput
 ```python
-@dataclass
-class LLMInput:
-    prompt: str                 # 분석할 프롬프트
-    llm_provider: LLMProvider   # OPENAI, ANTHROPIC, LOCAL
-    model_config: Optional[Dict[str, Any]]  # 모델별 설정
-    metadata: Optional[Dict[str, Any]]      # 추가 메타데이터
-```
-
-#### ModelConfig
-```python
-@dataclass
-class ModelConfig:
-    model: str                  # "gpt-4", "claude-3-sonnet"
-    temperature: float          # 0.0 ~ 1.0
-    max_tokens: int            # 최대 토큰 수
-    top_p: Optional[float]     # 0.0 ~ 1.0
-    frequency_penalty: Optional[float]  # -2.0 ~ 2.0
+class InputModel(BaseModel):
+    """입력 데이터 모델"""
+    field1: str = Field(..., description="필수 문자열 필드")
+    field2: Optional[int] = Field(None, description="선택적 정수 필드")
+    field3: List[str] = Field(default_factory=list, description="문자열 리스트")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "field1": "example_value",
+                "field2": 123,
+                "field3": ["item1", "item2"]
+            }
+        }
 ```
 
 ### 출력 데이터 스키마
-
-#### LLMResult
 ```python
-@dataclass
-class LLMResult:
-    summary: str                        # 생성된 요약
-    metadata: LLMResponseMetadata       # 응답 메타데이터
-    confidence_score: float             # 신뢰도 점수 (0.0 ~ 1.0)
-    validation_result: Optional[ValidationResult]  # 검증 결과
+class OutputModel(BaseModel):
+    """출력 데이터 모델"""
+    success: bool = Field(..., description="처리 성공 여부")
+    result: Any = Field(..., description="처리 결과")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="메타데이터")
+    timestamp: datetime = Field(default_factory=datetime.now, description="처리 시간")
 ```
 
-#### LLMResponseMetadata
+### 에러 응답 스키마
 ```python
-@dataclass
-class LLMResponseMetadata:
-    token_usage: Dict[str, int]         # 토큰 사용량
-    response_time: float                # 응답 시간 (초)
-    model_used: str                     # 사용된 모델명
-    provider: str                       # 제공자명
-    rate_limit_info: Optional[RateLimitInfo]  # Rate limit 정보
-```
-
-### 예외 스키마
-```python
-# 6가지 세분화된 예외 타입
-class LLMServiceException(Exception):           # 기본 예외
-class UnsupportedProviderException(LLMServiceException):  # 지원하지 않는 제공자
-class APICallFailedException(LLMServiceException):        # API 호출 실패
-class TokenLimitExceededException(LLMServiceException):   # 토큰 한도 초과
-class ResponseValidationException(LLMServiceException):   # 응답 검증 실패
-class ProviderNotConfiguredException(LLMServiceException): # 제공자 미설정
+class ErrorResponse(BaseModel):
+    """에러 응답 모델"""
+    error_code: str = Field(..., description="에러 코드")
+    error_message: str = Field(..., description="에러 메시지")
+    details: Optional[Dict[str, Any]] = Field(None, description="상세 정보")
 ```
 
 ## 🌊 데이터 흐름 시각화
 
-### 전체 처리 흐름
+### 전체 데이터 흐름
 ```mermaid
 sequenceDiagram
     participant Client
-    participant LLMService
-    participant ProviderManager
+    participant yeonjae-universal-llm-service
     participant ExternalAPI
-    participant Validator
+    participant Database
     
-    Client->>+LLMService: generate_summary(input_data)
-    LLMService->>+ProviderManager: select_provider(input_data.provider)
-    ProviderManager-->>-LLMService: provider_config
-    
-    LLMService->>+ExternalAPI: call_api(prompt, config)
-    ExternalAPI-->>-LLMService: raw_response
-    
-    LLMService->>+Validator: validate_response(raw_response)
-    Validator-->>-LLMService: validated_response
-    
-    LLMService->>LLMService: create_metadata(response_time, tokens)
-    LLMService-->>-Client: LLMResult(summary, metadata, confidence)
+    Client->>+yeonjae-universal-llm-service: Input Data
+    yeonjae-universal-llm-service->>+yeonjae-universal-llm-service: Validate Input
+    yeonjae-universal-llm-service->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-llm-service: API Response
+    yeonjae-universal-llm-service->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-llm-service: Data Response
+    yeonjae-universal-llm-service->>+yeonjae-universal-llm-service: Process & Transform
+    yeonjae-universal-llm-service-->>-Client: Output Result
 ```
 
-### 제공자 선택 흐름
+### 내부 처리 흐름
 ```mermaid
 flowchart TD
-    A[LLM Request] --> B{Provider Type}
-    B -->|OpenAI| C[Check OpenAI Config]
-    B -->|Anthropic| D[Check Anthropic Config]
-    B -->|Local| E[Use Local Model]
+    A[Input Validation] --> B{Valid?}
+    B -->|Yes| C[Core Processing]
+    B -->|No| D[Error Response]
+    C --> E[Data Transformation]
+    E --> F[Output Generation]
+    F --> G[Success Response]
     
-    C --> F{API Key Valid?}
-    D --> G{API Key Valid?}
-    
-    F -->|Yes| H[Call OpenAI API]
-    F -->|No| I[ProviderNotConfiguredException]
-    
-    G -->|Yes| J[Call Anthropic API]
-    G -->|No| I
-    
-    E --> K[Local Processing]
-    
-    H --> L[Process Response]
-    J --> L
-    K --> L
-    
-    L --> M[Validate & Return]
+    C --> H{External Call Needed?}
+    H -->|Yes| I[External API Call]
+    H -->|No| E
+    I --> J{API Success?}
+    J -->|Yes| E
+    J -->|No| K[Error Handling]
+    K --> D
 ```
 
 ## 🧪 테스트 전략
 
 ### 테스트 커버리지
 - **단위 테스트**: 95% 이상
-- **통합 테스트**: 실제 API 연동 테스트 (API 키 필요)
-- **비동기 테스트**: asyncio 기반 테스트
-- **모킹 테스트**: 외부 API 호출 모킹
+- **통합 테스트**: 주요 플로우 커버
+- **성능 테스트**: 응답 시간 기준
 
 ### 테스트 실행
 ```bash
 # 전체 테스트
 pytest tests/ -v
 
-# 비동기 테스트 포함
-pytest tests/ -v --asyncio-mode=auto
-
 # 커버리지 포함
-pytest tests/ --cov=universal_llm_service --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-llm-service --cov-report=html
 
-# 통합 테스트 (API 키 필요)
-OPENAI_API_KEY=your_key ANTHROPIC_API_KEY=your_key pytest tests/test_integration.py -v
+# 성능 테스트
+pytest tests/test_performance.py -v
 ```
-
-### 테스트 케이스
-- **정상 케이스**: 각 제공자별 요약 생성 성공
-- **에러 케이스**: API 키 누락, 토큰 한도 초과, 네트워크 오류
-- **검증 테스트**: 응답 품질 검증 로직
-- **제공자 전환**: 동적 제공자 변경 테스트
 
 ## 🔧 설정 및 환경변수
 
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `OPENAI_API_KEY` | OpenAI API 키 | None | 선택 |
-| `ANTHROPIC_API_KEY` | Anthropic API 키 | None | 선택 |
-| `LLM_DEFAULT_PROVIDER` | 기본 제공자 | openai | 선택 |
-| `LLM_MAX_TOKENS` | 최대 토큰 수 | 1000 | 선택 |
-| `LLM_TEMPERATURE` | 기본 temperature | 0.7 | 선택 |
+| `yeonjae-universal-llm-service_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-llm-service_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-llm-service_DEBUG` | 디버그 모드 | False | 선택 |
 
 ### 설정 파일 예시
-```python
-# config.py
-import os
-from universal_llm_service import LLMService, LLMProvider
-
-# 환경변수 설정
-os.environ["OPENAI_API_KEY"] = "your_openai_key"
-os.environ["ANTHROPIC_API_KEY"] = "your_anthropic_key"
-
-# 서비스 초기화
-llm_service = LLMService()
-
-# 기본 제공자 설정
-default_provider = os.getenv("LLM_DEFAULT_PROVIDER", "openai")
-if default_provider == "anthropic":
-    llm_service.switch_provider(LLMProvider.ANTHROPIC)
+```yaml
+# config.yaml
+yeonjae-universal-llm-service:
+  api_key: "${API_KEY}"
+  timeout: 30
+  retry_count: 3
+  log_level: "INFO"
 ```
 
 ## 📈 성능 지표
 
 ### 코드 품질
-- **테스트 커버리지**: 96.2%
-- **코드 라인 수**: 350 라인
-- **순환 복잡도**: 8
+- **테스트 커버리지**: 0.0%
+- **코드 라인 수**: 480 라인
+- **순환 복잡도**: 37
 
-### 벤치마크 결과
-- **OpenAI API 응답 시간**: 평균 1.2초
-- **Anthropic API 응답 시간**: 평균 1.8초
-- **로컬 모델 응답 시간**: 평균 0.3초
-- **메모리 사용량**: 평균 15MB
+### 확장성
+- **동시 처리**: 테스트 결과 기반으로 업데이트 예정
+- **메모리 사용량**: 프로파일링 결과 기반으로 업데이트 예정
 
-### API 사용량 최적화
-- **토큰 사용 효율성**: 95% (불필요한 토큰 최소화)
-- **캐싱 적용**: 동일 프롬프트 반복 요청 시 캐시 활용
-- **배치 처리**: 여러 요청 동시 처리 지원
+
+
+### 벤치마크
+- **처리 속도**: {수치} requests/second
+- **메모리 사용량**: 평균 {수치} MB
+- **응답 시간**: 평균 {수치} ms
+
+### 확장성
+- **동시 처리**: 최대 {수치} concurrent requests
+- **데이터 크기**: 최대 {수치} MB per request
 
 ## 🚨 에러 처리
 
 ### 에러 코드 정의
-| 코드 | 예외 클래스 | 설명 | 해결방법 |
-|------|-------------|------|----------|
-| `L001` | UnsupportedProviderException | 지원하지 않는 제공자 | 지원 제공자 목록 확인 |
-| `L002` | APICallFailedException | API 호출 실패 | API 키 및 네트워크 확인 |
-| `L003` | TokenLimitExceededException | 토큰 한도 초과 | 프롬프트 길이 조정 |
-| `L004` | ResponseValidationException | 응답 검증 실패 | 응답 형식 확인 |
-| `L005` | ProviderNotConfiguredException | 제공자 미설정 | API 키 설정 확인 |
+| 코드 | 설명 | 해결방법 |
+|------|------|----------|
+| `E001` | 입력 데이터 검증 실패 | 입력 스키마 확인 |
+| `E002` | 외부 API 호출 실패 | 네트워크 및 API 키 확인 |
+| `E003` | 내부 처리 오류 | 로그 확인 및 재시도 |
 
 ### 로깅 전략
 ```python
 import logging
 
 # 로거 설정
-logger = logging.getLogger('universal_llm_service')
+logger = logging.getLogger('universal_yeonjae-universal-llm-service')
 logger.setLevel(logging.INFO)
 
 # 사용 예시
-logger.info("LLM request started for provider: %s", provider)
-logger.debug("Token usage: %s", token_usage)
-logger.warning("High token usage detected: %d", total_tokens)
-logger.error("API call failed: %s", error_message)
+logger.info("Processing started")
+logger.error("Error occurred: %s", error_message)
 ```
 
 ## 🔗 관련 모듈 연동
 
 ### 의존 모듈
-- `asyncio`: 비동기 처리
-- `typing`: 타입 힌트
-- `logging`: 로깅
+- `universal-http-api-client`: HTTP 통신
+- `universal-notification-service`: 알림 발송
 
 ### 연동 예시
 ```python
-from universal_llm_service import LLMService, LLMInput, LLMProvider
-from universal_git_data_parser import GitDataParserService
+from universal_yeonjae-universal-llm-service import MainService
+from universal_http_api_client import HTTPAPIClient
 
-# Git 데이터 파싱 후 LLM 분석
-git_parser = GitDataParserService()
-llm_service = LLMService()
-
-async def analyze_commits(webhook_data):
-    # Git 데이터 파싱
-    parsed_data = git_parser.parse_webhook_data(webhook_data, {})
-    
-    # 커밋 정보를 프롬프트로 변환
-    commit_summary = f"다음 커밋들을 분석해주세요: {parsed_data.commits}"
-    
-    # LLM 분석 수행
-    llm_input = LLMInput(
-        prompt=commit_summary,
-        llm_provider=LLMProvider.OPENAI
-    )
-    
-    result = await llm_service.generate_summary(llm_input)
-    return result.summary
+# 모듈 간 연동
+api_client = HTTPAPIClient(platform=Platform.GITHUB)
+service = MainService(api_client=api_client)
 ```
 
 ## 📝 변경 이력
 
-### v1.0.0 (2024-01-15)
+### v1.0.0 (2024-01-XX)
 - 초기 릴리스
-- OpenAI, Anthropic, 로컬 LLM 지원
-- 비동기 API 호출 구현
-- 동적 제공자 전환 기능
-- 응답 품질 검증 시스템
-- 6가지 세분화된 예외 처리
-- 96% 이상 테스트 커버리지 달성
+- 핵심 기능 구현
+- 기본 테스트 커버리지 달성
+
+### v1.0.1 (2024-01-XX)
+- 버그 수정: {구체적 내용}
+- 성능 개선: {구체적 내용}
+- 문서 업데이트
+
+## 🤝 기여 가이드
+
+### 개발 환경 설정
+```bash
+# 저장소 클론
+git clone https://github.com/yeonjae-work/universal-modules.git
+
+# 개발 의존성 설치
+cd packages/yeonjae-universal-llm-service
+pip install -e ".[dev]"
+
+# 테스트 실행
+pytest tests/ -v
+```
+
+### 코드 스타일
+- **포매터**: Black
+- **린터**: Flake8
+- **타입 체커**: MyPy
+- **Import 정렬**: isort
+
+### Pull Request 가이드
+1. 기능 브랜치 생성
+2. 테스트 코드 작성
+3. 문서 업데이트
+4. PR 생성 및 리뷰 요청
+
+## 📞 지원 및 문의
+
+### 이슈 리포팅
+- **GitHub Issues**: [링크]
+- **이메일**: contact@codeping.ai
+
+### 커뮤니티
+- **Discord**: [링크]
+- **Slack**: [링크]
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2024-01-15 14:30:00  
-**다음 리뷰 예정**: 2024-02-15 
+**문서 버전**: v1.0.1  
+**마지막 업데이트**: 2025-06-28 10:20:20  
+**다음 리뷰 예정**: 2025-06-28 

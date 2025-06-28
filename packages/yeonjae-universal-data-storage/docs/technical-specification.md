@@ -1,10 +1,10 @@
-# universal-data-storage 기술명세서
+# yeonjae-universal-data-storage 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: universal-data-storage
-- **버전**: 1.0.0
+- **모듈명**: yeonjae-universal-data-storage
+- **버전**: 1.0.2
 - **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
@@ -22,7 +22,7 @@ Universal data storage module for persisting development data
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[External Input] --> B[universal-data-storage]
+    A[External Input] --> B[yeonjae-universal-data-storage]
     B --> C[Core Service]
     B --> D[Data Models]
     B --> E[Exception Handling]
@@ -31,9 +31,9 @@ graph TB
 
 ### 컴포넌트 구조
 ```
-universal-data-storage/
+yeonjae-universal-data-storage/
 ├── src/
-│   └── universal_universal-data-storage/
+│   └── universal_yeonjae-universal-data-storage/
 │       ├── __init__.py          # 공개 API
 │       ├── models.py            # 데이터 모델
 │       ├── service.py           # 핵심 서비스
@@ -66,18 +66,18 @@ graph LR
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-universal-data-storage
+pip install universal-yeonjae-universal-data-storage
 
 # 개발 의존성 포함
-pip install universal-universal-data-storage[dev]
+pip install universal-yeonjae-universal-data-storage[dev]
 
 # 모든 선택적 의존성 포함
-pip install universal-universal-data-storage[all]
+pip install universal-yeonjae-universal-data-storage[all]
 ```
 
 ### 기본 사용법
 ```python
-from universal_universal-data-storage import MainService
+from universal_yeonjae-universal-data-storage import MainService
 
 # 기본 초기화
 service = MainService()
@@ -89,7 +89,7 @@ result = service.main_function(input_data)
 ### 고급 사용법
 ```python
 # 설정 커스터마이징
-config = UniversalDataStorageConfig(
+config = YeonjaeUniversalDataStorageConfig(
     option1="value1",
     option2="value2"
 )
@@ -151,18 +151,18 @@ class ErrorResponse(BaseModel):
 ```mermaid
 sequenceDiagram
     participant Client
-    participant universal-data-storage
+    participant yeonjae-universal-data-storage
     participant ExternalAPI
     participant Database
     
-    Client->>+universal-data-storage: Input Data
-    universal-data-storage->>+universal-data-storage: Validate Input
-    universal-data-storage->>+ExternalAPI: API Request
-    ExternalAPI-->>-universal-data-storage: API Response
-    universal-data-storage->>+Database: Store/Retrieve Data
-    Database-->>-universal-data-storage: Data Response
-    universal-data-storage->>+universal-data-storage: Process & Transform
-    universal-data-storage-->>-Client: Output Result
+    Client->>+yeonjae-universal-data-storage: Input Data
+    yeonjae-universal-data-storage->>+yeonjae-universal-data-storage: Validate Input
+    yeonjae-universal-data-storage->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-data-storage: API Response
+    yeonjae-universal-data-storage->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-data-storage: Data Response
+    yeonjae-universal-data-storage->>+yeonjae-universal-data-storage: Process & Transform
+    yeonjae-universal-data-storage-->>-Client: Output Result
 ```
 
 ### 내부 처리 흐름
@@ -197,7 +197,7 @@ flowchart TD
 pytest tests/ -v
 
 # 커버리지 포함
-pytest tests/ --cov=universal_universal-data-storage --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-data-storage --cov-report=html
 
 # 성능 테스트
 pytest tests/test_performance.py -v
@@ -208,14 +208,14 @@ pytest tests/test_performance.py -v
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `universal-data-storage_API_KEY` | API 키 | None | 선택 |
-| `universal-data-storage_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
-| `universal-data-storage_DEBUG` | 디버그 모드 | False | 선택 |
+| `yeonjae-universal-data-storage_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-data-storage_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-data-storage_DEBUG` | 디버그 모드 | False | 선택 |
 
 ### 설정 파일 예시
 ```yaml
 # config.yaml
-universal-data-storage:
+yeonjae-universal-data-storage:
   api_key: "${API_KEY}"
   timeout: 30
   retry_count: 3
@@ -258,7 +258,7 @@ universal-data-storage:
 import logging
 
 # 로거 설정
-logger = logging.getLogger('universal_universal-data-storage')
+logger = logging.getLogger('universal_yeonjae-universal-data-storage')
 logger.setLevel(logging.INFO)
 
 # 사용 예시
@@ -274,7 +274,7 @@ logger.error("Error occurred: %s", error_message)
 
 ### 연동 예시
 ```python
-from universal_universal-data-storage import MainService
+from universal_yeonjae-universal-data-storage import MainService
 from universal_http_api_client import HTTPAPIClient
 
 # 모듈 간 연동
@@ -333,6 +333,6 @@ pytest tests/ -v
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2025-06-28 18:03:45  
+**문서 버전**: v1.0.2  
+**마지막 업데이트**: 2025-06-28 10:20:20  
 **다음 리뷰 예정**: 2025-06-28 

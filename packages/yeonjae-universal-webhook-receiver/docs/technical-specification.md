@@ -1,10 +1,10 @@
-# universal-webhook-receiver 기술명세서
+# yeonjae-universal-webhook-receiver 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: universal-webhook-receiver
-- **버전**: 1.0.0
+- **모듈명**: yeonjae-universal-webhook-receiver
+- **버전**: 1.0.2
 - **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
@@ -22,7 +22,7 @@ Universal webhook receiver module for handling webhooks from various sources
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[External Input] --> B[universal-webhook-receiver]
+    A[External Input] --> B[yeonjae-universal-webhook-receiver]
     B --> C[Core Service]
     B --> D[Data Models]
     B --> E[Exception Handling]
@@ -31,9 +31,9 @@ graph TB
 
 ### 컴포넌트 구조
 ```
-universal-webhook-receiver/
+yeonjae-universal-webhook-receiver/
 ├── src/
-│   └── universal_universal-webhook-receiver/
+│   └── universal_yeonjae-universal-webhook-receiver/
 │       ├── __init__.py          # 공개 API
 │       ├── models.py            # 데이터 모델
 │       ├── service.py           # 핵심 서비스
@@ -67,18 +67,18 @@ graph LR
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-universal-webhook-receiver
+pip install universal-yeonjae-universal-webhook-receiver
 
 # 개발 의존성 포함
-pip install universal-universal-webhook-receiver[dev]
+pip install universal-yeonjae-universal-webhook-receiver[dev]
 
 # 모든 선택적 의존성 포함
-pip install universal-universal-webhook-receiver[all]
+pip install universal-yeonjae-universal-webhook-receiver[all]
 ```
 
 ### 기본 사용법
 ```python
-from universal_universal-webhook-receiver import MainService
+from universal_yeonjae-universal-webhook-receiver import MainService
 
 # 기본 초기화
 service = MainService()
@@ -90,7 +90,7 @@ result = service.main_function(input_data)
 ### 고급 사용법
 ```python
 # 설정 커스터마이징
-config = UniversalWebhookReceiverConfig(
+config = YeonjaeUniversalWebhookReceiverConfig(
     option1="value1",
     option2="value2"
 )
@@ -152,18 +152,18 @@ class ErrorResponse(BaseModel):
 ```mermaid
 sequenceDiagram
     participant Client
-    participant universal-webhook-receiver
+    participant yeonjae-universal-webhook-receiver
     participant ExternalAPI
     participant Database
     
-    Client->>+universal-webhook-receiver: Input Data
-    universal-webhook-receiver->>+universal-webhook-receiver: Validate Input
-    universal-webhook-receiver->>+ExternalAPI: API Request
-    ExternalAPI-->>-universal-webhook-receiver: API Response
-    universal-webhook-receiver->>+Database: Store/Retrieve Data
-    Database-->>-universal-webhook-receiver: Data Response
-    universal-webhook-receiver->>+universal-webhook-receiver: Process & Transform
-    universal-webhook-receiver-->>-Client: Output Result
+    Client->>+yeonjae-universal-webhook-receiver: Input Data
+    yeonjae-universal-webhook-receiver->>+yeonjae-universal-webhook-receiver: Validate Input
+    yeonjae-universal-webhook-receiver->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-webhook-receiver: API Response
+    yeonjae-universal-webhook-receiver->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-webhook-receiver: Data Response
+    yeonjae-universal-webhook-receiver->>+yeonjae-universal-webhook-receiver: Process & Transform
+    yeonjae-universal-webhook-receiver-->>-Client: Output Result
 ```
 
 ### 내부 처리 흐름
@@ -198,7 +198,7 @@ flowchart TD
 pytest tests/ -v
 
 # 커버리지 포함
-pytest tests/ --cov=universal_universal-webhook-receiver --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-webhook-receiver --cov-report=html
 
 # 성능 테스트
 pytest tests/test_performance.py -v
@@ -209,14 +209,14 @@ pytest tests/test_performance.py -v
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `universal-webhook-receiver_API_KEY` | API 키 | None | 선택 |
-| `universal-webhook-receiver_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
-| `universal-webhook-receiver_DEBUG` | 디버그 모드 | False | 선택 |
+| `yeonjae-universal-webhook-receiver_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-webhook-receiver_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-webhook-receiver_DEBUG` | 디버그 모드 | False | 선택 |
 
 ### 설정 파일 예시
 ```yaml
 # config.yaml
-universal-webhook-receiver:
+yeonjae-universal-webhook-receiver:
   api_key: "${API_KEY}"
   timeout: 30
   retry_count: 3
@@ -259,7 +259,7 @@ universal-webhook-receiver:
 import logging
 
 # 로거 설정
-logger = logging.getLogger('universal_universal-webhook-receiver')
+logger = logging.getLogger('universal_yeonjae-universal-webhook-receiver')
 logger.setLevel(logging.INFO)
 
 # 사용 예시
@@ -275,7 +275,7 @@ logger.error("Error occurred: %s", error_message)
 
 ### 연동 예시
 ```python
-from universal_universal-webhook-receiver import MainService
+from universal_yeonjae-universal-webhook-receiver import MainService
 from universal_http_api_client import HTTPAPIClient
 
 # 모듈 간 연동
@@ -334,6 +334,6 @@ pytest tests/ -v
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2025-06-28 18:03:46  
+**문서 버전**: v1.0.2  
+**마지막 업데이트**: 2025-06-28 10:20:21  
 **다음 리뷰 예정**: 2025-06-28 

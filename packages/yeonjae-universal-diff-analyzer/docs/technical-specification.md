@@ -1,10 +1,10 @@
-# universal-diff-analyzer 기술명세서
+# yeonjae-universal-diff-analyzer 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: universal-diff-analyzer
-- **버전**: 1.0.0
+- **모듈명**: yeonjae-universal-diff-analyzer
+- **버전**: 1.0.2
 - **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
@@ -22,7 +22,7 @@ Universal diff analyzer module for analyzing code changes and complexity
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[External Input] --> B[universal-diff-analyzer]
+    A[External Input] --> B[yeonjae-universal-diff-analyzer]
     B --> C[Core Service]
     B --> D[Data Models]
     B --> E[Exception Handling]
@@ -31,9 +31,9 @@ graph TB
 
 ### 컴포넌트 구조
 ```
-universal-diff-analyzer/
+yeonjae-universal-diff-analyzer/
 ├── src/
-│   └── universal_universal-diff-analyzer/
+│   └── universal_yeonjae-universal-diff-analyzer/
 │       ├── __init__.py          # 공개 API
 │       ├── models.py            # 데이터 모델
 │       ├── service.py           # 핵심 서비스
@@ -65,18 +65,18 @@ graph LR
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-universal-diff-analyzer
+pip install universal-yeonjae-universal-diff-analyzer
 
 # 개발 의존성 포함
-pip install universal-universal-diff-analyzer[dev]
+pip install universal-yeonjae-universal-diff-analyzer[dev]
 
 # 모든 선택적 의존성 포함
-pip install universal-universal-diff-analyzer[all]
+pip install universal-yeonjae-universal-diff-analyzer[all]
 ```
 
 ### 기본 사용법
 ```python
-from universal_universal-diff-analyzer import MainService
+from universal_yeonjae-universal-diff-analyzer import MainService
 
 # 기본 초기화
 service = MainService()
@@ -88,7 +88,7 @@ result = service.main_function(input_data)
 ### 고급 사용법
 ```python
 # 설정 커스터마이징
-config = UniversalDiffAnalyzerConfig(
+config = YeonjaeUniversalDiffAnalyzerConfig(
     option1="value1",
     option2="value2"
 )
@@ -150,18 +150,18 @@ class ErrorResponse(BaseModel):
 ```mermaid
 sequenceDiagram
     participant Client
-    participant universal-diff-analyzer
+    participant yeonjae-universal-diff-analyzer
     participant ExternalAPI
     participant Database
     
-    Client->>+universal-diff-analyzer: Input Data
-    universal-diff-analyzer->>+universal-diff-analyzer: Validate Input
-    universal-diff-analyzer->>+ExternalAPI: API Request
-    ExternalAPI-->>-universal-diff-analyzer: API Response
-    universal-diff-analyzer->>+Database: Store/Retrieve Data
-    Database-->>-universal-diff-analyzer: Data Response
-    universal-diff-analyzer->>+universal-diff-analyzer: Process & Transform
-    universal-diff-analyzer-->>-Client: Output Result
+    Client->>+yeonjae-universal-diff-analyzer: Input Data
+    yeonjae-universal-diff-analyzer->>+yeonjae-universal-diff-analyzer: Validate Input
+    yeonjae-universal-diff-analyzer->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-diff-analyzer: API Response
+    yeonjae-universal-diff-analyzer->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-diff-analyzer: Data Response
+    yeonjae-universal-diff-analyzer->>+yeonjae-universal-diff-analyzer: Process & Transform
+    yeonjae-universal-diff-analyzer-->>-Client: Output Result
 ```
 
 ### 내부 처리 흐름
@@ -196,7 +196,7 @@ flowchart TD
 pytest tests/ -v
 
 # 커버리지 포함
-pytest tests/ --cov=universal_universal-diff-analyzer --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-diff-analyzer --cov-report=html
 
 # 성능 테스트
 pytest tests/test_performance.py -v
@@ -207,14 +207,14 @@ pytest tests/test_performance.py -v
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `universal-diff-analyzer_API_KEY` | API 키 | None | 선택 |
-| `universal-diff-analyzer_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
-| `universal-diff-analyzer_DEBUG` | 디버그 모드 | False | 선택 |
+| `yeonjae-universal-diff-analyzer_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-diff-analyzer_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-diff-analyzer_DEBUG` | 디버그 모드 | False | 선택 |
 
 ### 설정 파일 예시
 ```yaml
 # config.yaml
-universal-diff-analyzer:
+yeonjae-universal-diff-analyzer:
   api_key: "${API_KEY}"
   timeout: 30
   retry_count: 3
@@ -257,7 +257,7 @@ universal-diff-analyzer:
 import logging
 
 # 로거 설정
-logger = logging.getLogger('universal_universal-diff-analyzer')
+logger = logging.getLogger('universal_yeonjae-universal-diff-analyzer')
 logger.setLevel(logging.INFO)
 
 # 사용 예시
@@ -273,7 +273,7 @@ logger.error("Error occurred: %s", error_message)
 
 ### 연동 예시
 ```python
-from universal_universal-diff-analyzer import MainService
+from universal_yeonjae-universal-diff-analyzer import MainService
 from universal_http_api_client import HTTPAPIClient
 
 # 모듈 간 연동
@@ -332,6 +332,6 @@ pytest tests/ -v
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2025-06-28 18:03:45  
+**문서 버전**: v1.0.2  
+**마지막 업데이트**: 2025-06-28 10:20:20  
 **다음 리뷰 예정**: 2025-06-28 

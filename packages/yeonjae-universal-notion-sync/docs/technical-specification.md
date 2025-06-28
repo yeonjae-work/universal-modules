@@ -1,442 +1,340 @@
-# Notion Sync 모듈 기술명세서
+# yeonjae-universal-notion-sync 기술명세서
 
-## 1. 모듈 개요
+## 📖 모듈 개요
 
-### 1.1 목적
-Notion API를 활용하여 개발 요약 데이터를 Notion 데이터베이스에 동기화하는 모듈입니다.
+### 기본 정보
+- **모듈명**: yeonjae-universal-notion-sync
+- **버전**: 1.0.1
+- **최종 업데이트**: 2025-06-28
+- **담당자**: Universal Modules Team
+- **라이센스**: MIT
 
-### 1.2 주요 기능
-- Notion 데이터베이스 연동
-- 개발 요약 데이터 자동 업로드
-- 페이지 및 블록 생성/업데이트
-- 메타데이터 추적
-- 에러 복구 및 재시도
+### 목적 및 책임
+Universal Notion synchronization service for development data and documentation
 
-### 1.3 버전 정보
-- **현재 버전**: 1.0.0
-- **최소 Python 버전**: 3.9+
-- **라이선스**: MIT
+### 핵심 기능
+- 기능 1: {설명}
+- 기능 2: {설명}
+- 기능 3: {설명}
 
-## 2. 아키텍처
+## 🏗️ 아키텍처
 
-### 2.1 시스템 구조
+### 시스템 구조
 ```mermaid
 graph TB
-    A[NotionSyncService] --> B[Notion Client]
-    A --> C[Data Transformer]
-    A --> D[Sync Manager]
-    
-    B --> E[Notion API]
-    
-    subgraph "Data Models"
-        F[SyncInput]
-        G[SyncResult]
-        H[NotionPage]
-        I[SyncMetadata]
-    end
-    
-    subgraph "Exception Handling"
-        J[NotionSyncException]
-        K[NotionAPIException]
-        L[DataTransformException]
-        M[SyncFailedException]
-    end
+    A[External Input] --> B[yeonjae-universal-notion-sync]
+    B --> C[Core Service]
+    B --> D[Data Models]
+    B --> E[Exception Handling]
+    C --> F[External Output]
 ```
 
-### 2.2 데이터 흐름
+### 컴포넌트 구조
+```
+yeonjae-universal-notion-sync/
+├── src/
+│   └── universal_yeonjae-universal-notion-sync/
+│       ├── __init__.py          # 공개 API
+│       ├── models.py            # 데이터 모델
+│       ├── service.py           # 핵심 서비스
+│       ├── exceptions.py        # 예외 정의
+│       ├── utils.py            # 유틸리티
+│       └── py.typed            # 타입 지원
+├── tests/                      # 테스트 코드
+├── docs/                       # 문서
+├── pyproject.toml             # 패키지 설정
+└── README.md                  # 기본 설명
+```
+
+### 의존성 다이어그램
 ```mermaid
-sequenceDiagram
-    participant C as Client
-    participant N as NotionSyncService
-    participant T as DataTransformer
-    participant API as Notion API
+graph LR
+    A[모듈] --> B[pydantic]
+    A --> E[requests]
+    A --> F[pydantic]
+    A --> G[typing-extensions]
+    A --> H[python-dateutil]
     
-    C->>N: sync_to_notion(input)
-    N->>T: Transform Data
-    T->>N: Formatted Data
-    N->>API: Create/Update Page
-    API->>N: Response
-    N->>C: SyncResult
+    subgraph "선택적 의존성"
+        E[dev dependencies]
+        F[platform specific]
+    end
 ```
 
-## 3. 핵심 클래스 및 컴포넌트
+## 📚 사용 설명서
 
-### 3.1 NotionSyncService
-메인 동기화 서비스 클래스입니다.
 
-```python
-class NotionSyncService:
-    def __init__(self)
-    
-    async def sync_to_notion(self, input_data: SyncInput) -> SyncResult
-    def get_database_info(self, database_id: str) -> Dict[str, Any]
-    def create_page(self, database_id: str, properties: Dict[str, Any]) -> str
-    def update_page(self, page_id: str, properties: Dict[str, Any]) -> bool
-    
-    # 내부 메서드
-    def _transform_to_notion_format(self, input_data: SyncInput) -> Dict[str, Any]
-    def _create_metadata(self, input_data: SyncInput, sync_time: datetime) -> SyncMetadata
-    def _handle_sync_error(self, error: Exception, input_data: SyncInput) -> SyncResult
+
+### 설치 방법
+```bash
+# 기본 설치
+pip install universal-yeonjae-universal-notion-sync
+
+# 개발 의존성 포함
+pip install universal-yeonjae-universal-notion-sync[dev]
+
+# 모든 선택적 의존성 포함
+pip install universal-yeonjae-universal-notion-sync[all]
 ```
 
-**주요 기능:**
-- Notion API를 통한 데이터베이스 연동
-- 개발 요약 데이터 구조화 및 변환
-- 페이지 생성 및 업데이트 관리
-- 동기화 상태 추적 및 에러 처리
-
-### 3.2 데이터 모델
-
-#### SyncInput
+### 기본 사용법
 ```python
-class SyncInput(BaseModel):
-    summary_report: str = Field(..., description="동기화할 요약 보고서")
-    developer: str = Field(..., description="개발자 이름")
-    date: datetime = Field(..., description="보고서 날짜")
-    metadata: Optional[Dict[str, Any]] = Field(default=None, description="추가 메타데이터")
-    database_id: str = Field(..., description="Notion 데이터베이스 ID")
+from universal_yeonjae-universal-notion-sync import MainService
+
+# 기본 초기화
+service = MainService()
+
+# 주요 기능 사용
+result = service.main_function(input_data)
 ```
 
-#### SyncResult
+### 고급 사용법
 ```python
-class SyncResult(BaseModel):
-    success: bool = Field(..., description="동기화 성공 여부")
-    page_id: Optional[str] = Field(default=None, description="생성된 페이지 ID")
-    page_url: Optional[str] = Field(default=None, description="페이지 URL")
-    sync_metadata: SyncMetadata = Field(..., description="동기화 메타데이터")
-    error_details: Optional[Dict[str, Any]] = Field(default=None, description="에러 상세")
-```
+# 설정 커스터마이징
+config = YeonjaeUniversalNotionSyncConfig(
+    option1="value1",
+    option2="value2"
+)
 
-#### NotionPage
-```python
-class NotionPage(BaseModel):
-    id: str = Field(..., description="페이지 ID")
-    title: str = Field(..., description="페이지 제목")
-    url: str = Field(..., description="페이지 URL")
-    created_time: datetime = Field(..., description="생성 시간")
-    last_edited_time: datetime = Field(..., description="마지막 수정 시간")
-    properties: Dict[str, Any] = Field(..., description="페이지 속성")
-```
+service = MainService(config=config)
 
-#### SyncMetadata
-```python
-class SyncMetadata(BaseModel):
-    sync_time: datetime = Field(..., description="동기화 시간")
-    page_count: int = Field(..., description="생성된 페이지 수")
-    data_size: int = Field(..., description="동기화된 데이터 크기")
-    processing_time: float = Field(..., description="처리 시간")
-    notion_request_id: Optional[str] = Field(default=None, description="Notion 요청 ID")
-```
-
-### 3.3 예외 처리
-
-모듈은 4가지 특화된 예외 클래스를 제공합니다:
-
-1. **NotionSyncException**: 기본 Notion 동기화 예외
-2. **NotionAPIException**: Notion API 오류
-3. **DataTransformException**: 데이터 변환 오류
-4. **SyncFailedException**: 동기화 실패
-
-## 4. 사용법
-
-### 4.1 기본 사용법
-
-```python
-from universal_notion_sync import NotionSyncService, SyncInput
-from datetime import datetime
+# 비동기 사용 (해당하는 경우)
 import asyncio
 
 async def main():
-    # 서비스 초기화
-    notion_service = NotionSyncService()
-    
-    # 동기화 입력 데이터
-    sync_input = SyncInput(
-        summary_report="오늘의 개발 활동 요약...",
-        developer="John Doe",
-        date=datetime.now(),
-        database_id="your-notion-database-id"
-    )
-    
-    # Notion에 동기화
-    result = await notion_service.sync_to_notion(sync_input)
-    
-    if result.success:
-        print(f"동기화 성공! 페이지 URL: {result.page_url}")
-    else:
-        print(f"동기화 실패: {result.error_details}")
+    result = await service.async_function(data)
+    return result
 
 asyncio.run(main())
 ```
 
-### 4.2 메타데이터 포함 동기화
+## 🔄 입력/출력 데이터 구조
 
+### 입력 데이터 스키마
 ```python
-# 상세 메타데이터와 함께 동기화
-sync_input = SyncInput(
-    summary_report="상세한 개발 보고서...",
-    developer="Jane Smith",
-    date=datetime.now(),
-    database_id="database-id",
-    metadata={
-        "commits": 15,
-        "files_changed": 8,
-        "lines_added": 342,
-        "lines_removed": 156,
-        "project": "Universal Modules"
-    }
-)
-
-result = await notion_service.sync_to_notion(sync_input)
+class InputModel(BaseModel):
+    """입력 데이터 모델"""
+    field1: str = Field(..., description="필수 문자열 필드")
+    field2: Optional[int] = Field(None, description="선택적 정수 필드")
+    field3: List[str] = Field(default_factory=list, description="문자열 리스트")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "field1": "example_value",
+                "field2": 123,
+                "field3": ["item1", "item2"]
+            }
+        }
 ```
 
-### 4.3 데이터베이스 정보 조회
-
+### 출력 데이터 스키마
 ```python
-# Notion 데이터베이스 스키마 확인
-database_info = notion_service.get_database_info("your-database-id")
-print(f"데이터베이스 제목: {database_info['title']}")
-print(f"속성 수: {len(database_info['properties'])}")
-
-# 사용 가능한 속성 확인
-for prop_name, prop_info in database_info['properties'].items():
-    print(f"- {prop_name}: {prop_info['type']}")
+class OutputModel(BaseModel):
+    """출력 데이터 모델"""
+    success: bool = Field(..., description="처리 성공 여부")
+    result: Any = Field(..., description="처리 결과")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="메타데이터")
+    timestamp: datetime = Field(default_factory=datetime.now, description="처리 시간")
 ```
 
-### 4.4 배치 동기화
-
+### 에러 응답 스키마
 ```python
-# 여러 보고서 동시 동기화
-reports = [
-    {"developer": "Alice", "summary": "Frontend 개발"},
-    {"developer": "Bob", "summary": "Backend API 구현"},
-    {"developer": "Charlie", "summary": "데이터베이스 최적화"}
-]
-
-tasks = []
-for report in reports:
-    sync_input = SyncInput(
-        summary_report=report["summary"],
-        developer=report["developer"],
-        date=datetime.now(),
-        database_id="database-id"
-    )
-    tasks.append(notion_service.sync_to_notion(sync_input))
-
-results = await asyncio.gather(*tasks)
-
-for i, result in enumerate(results):
-    if result.success:
-        print(f"✅ {reports[i]['developer']}: {result.page_url}")
-    else:
-        print(f"❌ {reports[i]['developer']}: 동기화 실패")
+class ErrorResponse(BaseModel):
+    """에러 응답 모델"""
+    error_code: str = Field(..., description="에러 코드")
+    error_message: str = Field(..., description="에러 메시지")
+    details: Optional[Dict[str, Any]] = Field(None, description="상세 정보")
 ```
 
-## 5. API 참조
+## 🌊 데이터 흐름 시각화
 
-### 5.1 입력 데이터 구조
-
-#### 기본 SyncInput
-```json
-{
-  "summary_report": "개발 활동 요약 텍스트",
-  "developer": "개발자 이름",
-  "date": "2024-01-01T12:00:00Z",
-  "database_id": "notion-database-id",
-  "metadata": {
-    "commits": 10,
-    "files_changed": 5,
-    "project": "프로젝트명"
-  }
-}
+### 전체 데이터 흐름
+```mermaid
+sequenceDiagram
+    participant Client
+    participant yeonjae-universal-notion-sync
+    participant ExternalAPI
+    participant Database
+    
+    Client->>+yeonjae-universal-notion-sync: Input Data
+    yeonjae-universal-notion-sync->>+yeonjae-universal-notion-sync: Validate Input
+    yeonjae-universal-notion-sync->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-notion-sync: API Response
+    yeonjae-universal-notion-sync->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-notion-sync: Data Response
+    yeonjae-universal-notion-sync->>+yeonjae-universal-notion-sync: Process & Transform
+    yeonjae-universal-notion-sync-->>-Client: Output Result
 ```
 
-### 5.2 출력 데이터 구조
-
-#### SyncResult
-```json
-{
-  "success": true,
-  "page_id": "page-id-12345",
-  "page_url": "https://notion.so/page-id-12345",
-  "sync_metadata": {
-    "sync_time": "2024-01-01T12:00:00Z",
-    "page_count": 1,
-    "data_size": 1024,
-    "processing_time": 0.5,
-    "notion_request_id": "req-123"
-  },
-  "error_details": null
-}
+### 내부 처리 흐름
+```mermaid
+flowchart TD
+    A[Input Validation] --> B{Valid?}
+    B -->|Yes| C[Core Processing]
+    B -->|No| D[Error Response]
+    C --> E[Data Transformation]
+    E --> F[Output Generation]
+    F --> G[Success Response]
+    
+    C --> H{External Call Needed?}
+    H -->|Yes| I[External API Call]
+    H -->|No| E
+    I --> J{API Success?}
+    J -->|Yes| E
+    J -->|No| K[Error Handling]
+    K --> D
 ```
 
-## 6. 성능 및 제한사항
+## 🧪 테스트 전략
 
-### 6.1 성능 지표
-- **평균 동기화 시간**: 0.3-0.8초
-- **최대 데이터 크기**: 100KB per page
-- **동시 요청 수**: 10개 (Notion API 제한)
-- **성공률**: 98% 이상
+### 테스트 커버리지
+- **단위 테스트**: 95% 이상
+- **통합 테스트**: 주요 플로우 커버
+- **성능 테스트**: 응답 시간 기준
 
-### 6.2 Notion API 제한사항
-- **Rate Limiting**: 3 requests/second
-- **페이지 크기**: 최대 100KB
-- **블록 수**: 페이지당 최대 1,000개
-- **데이터베이스 속성**: 최대 50개
+### 테스트 실행
+```bash
+# 전체 테스트
+pytest tests/ -v
 
-### 6.3 제한사항
-- Notion API 키 필요
-- 인터넷 연결 필수
-- 데이터베이스 권한 필요
-- 대용량 데이터 처리 제한
+# 커버리지 포함
+pytest tests/ --cov=universal_yeonjae-universal-notion-sync --cov-report=html
 
-## 7. 에러 처리 및 로깅
-
-### 7.1 예외 처리 예제
-```python
-from universal_notion_sync import (
-    NotionSyncService, NotionAPIException,
-    DataTransformException, SyncFailedException
-)
-
-try:
-    result = await notion_service.sync_to_notion(sync_input)
-except NotionAPIException as e:
-    print(f"Notion API 오류: {e.status_code} - {e.message}")
-    if e.status_code == 401:
-        print("API 키를 확인하세요.")
-    elif e.status_code == 429:
-        print("Rate limit 초과. 잠시 후 재시도하세요.")
-except DataTransformException as e:
-    print(f"데이터 변환 오류: {e.message}")
-    print(f"문제 필드: {e.field_name}")
-except SyncFailedException as e:
-    print(f"동기화 실패: {e.message}")
-    print(f"재시도 가능: {e.retryable}")
+# 성능 테스트
+pytest tests/test_performance.py -v
 ```
 
-### 7.2 로깅 설정
+## 🔧 설정 및 환경변수
+
+### 환경변수
+| 변수명 | 설명 | 기본값 | 필수여부 |
+|--------|------|--------|----------|
+| `yeonjae-universal-notion-sync_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-notion-sync_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-notion-sync_DEBUG` | 디버그 모드 | False | 선택 |
+
+### 설정 파일 예시
+```yaml
+# config.yaml
+yeonjae-universal-notion-sync:
+  api_key: "${API_KEY}"
+  timeout: 30
+  retry_count: 3
+  log_level: "INFO"
+```
+
+## 📈 성능 지표
+
+### 코드 품질
+- **테스트 커버리지**: 0.0%
+- **코드 라인 수**: 1,138 라인
+- **순환 복잡도**: 189
+
+### 확장성
+- **동시 처리**: 테스트 결과 기반으로 업데이트 예정
+- **메모리 사용량**: 프로파일링 결과 기반으로 업데이트 예정
+
+
+
+### 벤치마크
+- **처리 속도**: {수치} requests/second
+- **메모리 사용량**: 평균 {수치} MB
+- **응답 시간**: 평균 {수치} ms
+
+### 확장성
+- **동시 처리**: 최대 {수치} concurrent requests
+- **데이터 크기**: 최대 {수치} MB per request
+
+## 🚨 에러 처리
+
+### 에러 코드 정의
+| 코드 | 설명 | 해결방법 |
+|------|------|----------|
+| `E001` | 입력 데이터 검증 실패 | 입력 스키마 확인 |
+| `E002` | 외부 API 호출 실패 | 네트워크 및 API 키 확인 |
+| `E003` | 내부 처리 오류 | 로그 확인 및 재시도 |
+
+### 로깅 전략
 ```python
 import logging
 
-# Notion Sync 로깅 설정
-logging.getLogger("universal_notion_sync").setLevel(logging.DEBUG)
+# 로거 설정
+logger = logging.getLogger('universal_yeonjae-universal-notion-sync')
+logger.setLevel(logging.INFO)
 
-# 상세 API 로깅
-logging.getLogger("universal_notion_sync.api").setLevel(logging.INFO)
-
-# 데이터 변환 로깅
-logging.getLogger("universal_notion_sync.transform").setLevel(logging.WARNING)
+# 사용 예시
+logger.info("Processing started")
+logger.error("Error occurred: %s", error_message)
 ```
 
-## 8. 환경 설정
+## 🔗 관련 모듈 연동
 
-### 8.1 환경 변수
-```bash
-# Notion 설정
-export NOTION_API_KEY="your-notion-integration-token"
-export NOTION_DATABASE_ID="your-default-database-id"
+### 의존 모듈
+- `universal-http-api-client`: HTTP 통신
+- `universal-notification-service`: 알림 발송
 
-# 선택적 설정
-export NOTION_BASE_URL="https://api.notion.com/v1"
-export NOTION_TIMEOUT="30"
-```
-
-### 8.2 Notion 데이터베이스 구조
-권장 데이터베이스 속성 구조:
-
-```json
-{
-  "properties": {
-    "Title": {"type": "title"},
-    "Developer": {"type": "rich_text"},
-    "Date": {"type": "date"},
-    "Summary": {"type": "rich_text"},
-    "Commits": {"type": "number"},
-    "Files Changed": {"type": "number"},
-    "Lines Added": {"type": "number"},
-    "Lines Removed": {"type": "number"},
-    "Project": {"type": "select"},
-    "Status": {"type": "select", "options": ["완료", "진행중", "검토중"]}
-  }
-}
-```
-
-### 8.3 Notion 통합 설정
-1. Notion에서 새 통합 생성
-2. API 키 복사
-3. 데이터베이스에 통합 권한 부여
-4. 환경 변수 설정
-
-## 9. 테스트 전략
-
-### 9.1 테스트 커버리지
-- **단위 테스트**: 90% 이상
-- **통합 테스트**: Notion API 모킹
-- **E2E 테스트**: 실제 Notion 데이터베이스 연동
-
-### 9.2 테스트 실행
-```bash
-# 모든 테스트 실행
-pytest tests/
-
-# API 테스트 (모킹)
-pytest tests/test_notion_api.py
-
-# 데이터 변환 테스트
-pytest tests/test_data_transform.py
-
-# E2E 테스트 (실제 API)
-pytest tests/test_e2e.py --notion-api-key=$NOTION_API_KEY
-```
-
-## 10. 의존성
-
-### 10.1 필수 의존성
-```toml
-[dependencies]
-pydantic = "^2.0.0"
-aiohttp = "^3.8.0"
-python-dateutil = "^2.8.2"
-```
-
-### 10.2 개발 의존성
-```toml
-[dev-dependencies]
-pytest = "^7.4.0"
-pytest-asyncio = "^0.21.0"
-pytest-mock = "^3.11.0"
-aioresponses = "^0.7.0"
-```
-
-## 11. 확장성
-
-### 11.1 커스텀 데이터 변환기
+### 연동 예시
 ```python
-# 커스텀 변환기 등록
-def custom_transformer(data: Dict[str, Any]) -> Dict[str, Any]:
-    # 커스텀 변환 로직
-    return transformed_data
+from universal_yeonjae-universal-notion-sync import MainService
+from universal_http_api_client import HTTPAPIClient
 
-notion_service.register_transformer("custom_format", custom_transformer)
+# 모듈 간 연동
+api_client = HTTPAPIClient(platform=Platform.GITHUB)
+service = MainService(api_client=api_client)
 ```
 
-### 11.2 템플릿 시스템
-```python
-# 페이지 템플릿 정의
-template = {
-    "title": "{{developer}} - {{date}}",
-    "properties": {
-        "Developer": {"rich_text": [{"text": {"content": "{{developer}}"}}]},
-        "Summary": {"rich_text": [{"text": {"content": "{{summary_report}}"}}]}
-    }
-}
+## 📝 변경 이력
 
-notion_service.register_template("daily_report", template)
+### v1.0.0 (2024-01-XX)
+- 초기 릴리스
+- 핵심 기능 구현
+- 기본 테스트 커버리지 달성
+
+### v1.0.1 (2024-01-XX)
+- 버그 수정: {구체적 내용}
+- 성능 개선: {구체적 내용}
+- 문서 업데이트
+
+## 🤝 기여 가이드
+
+### 개발 환경 설정
+```bash
+# 저장소 클론
+git clone https://github.com/yeonjae-work/universal-modules.git
+
+# 개발 의존성 설치
+cd packages/yeonjae-universal-notion-sync
+pip install -e ".[dev]"
+
+# 테스트 실행
+pytest tests/ -v
 ```
+
+### 코드 스타일
+- **포매터**: Black
+- **린터**: Flake8
+- **타입 체커**: MyPy
+- **Import 정렬**: isort
+
+### Pull Request 가이드
+1. 기능 브랜치 생성
+2. 테스트 코드 작성
+3. 문서 업데이트
+4. PR 생성 및 리뷰 요청
+
+## 📞 지원 및 문의
+
+### 이슈 리포팅
+- **GitHub Issues**: [링크]
+- **이메일**: contact@codeping.ai
+
+### 커뮤니티
+- **Discord**: [링크]
+- **Slack**: [링크]
 
 ---
 
-**최종 업데이트**: 2024-12-19
-**문서 버전**: 1.0.0
-**담당자**: Universal Modules Team 
+**문서 버전**: v1.0.1  
+**마지막 업데이트**: 2025-06-28 10:20:21  
+**다음 리뷰 예정**: 2025-06-28 

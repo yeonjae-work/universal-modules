@@ -1,57 +1,44 @@
-# notification-service 기술명세서
+# yeonjae-universal-notification-service 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: notification-service
-- **버전**: v1.0.0
-- **최종 업데이트**: 2024-01-15
+- **모듈명**: yeonjae-universal-notification-service
+- **버전**: 1.0.1
+- **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
 
 ### 목적 및 책임
-Slack, 이메일, Discord 등 다양한 채널로 알림을 전송하는 범용 모듈입니다. 일일 요약 보고서 전송, 알림 템플릿 관리, 개인화된 알림을 제공하며, AI-driven Modular Design 원칙에 따라 설계되어 다른 프로젝트에서도 독립적으로 사용할 수 있습니다.
+Universal notification service supporting Slack, Email, Discord, and webhooks for automated reporting
 
 ### 핵심 기능
-- **다중 채널 지원**: Slack, 이메일, Discord, Webhook 통합 알림
-- **템플릿 시스템**: 재사용 가능한 메시지 템플릿 관리
-- **배치 전송**: 여러 수신자에게 동시 알림 전송
-- **재시도 메커니즘**: 전송 실패 시 자동 재시도
-- **개인화**: 수신자별 맞춤형 메시지 생성
-- **전송 이력**: 알림 전송 기록 및 통계
+- 기능 1: {설명}
+- 기능 2: {설명}
+- 기능 3: {설명}
 
 ## 🏗️ 아키텍처
 
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[Client Application] --> B[NotificationService]
-    
-    B --> C[Channel Manager]
-    C --> D[Slack Channel]
-    C --> E[Email Channel]
-    C --> F[Discord Channel]
-    C --> G[Webhook Channel]
-    
-    B --> H[Template Engine]
-    B --> I[Retry Manager]
-    B --> J[History Tracker]
-    
-    D --> K[Slack API]
-    E --> L[SMTP Server]
-    F --> M[Discord API]
-    G --> N[HTTP Webhook]
+    A[External Input] --> B[yeonjae-universal-notification-service]
+    B --> C[Core Service]
+    B --> D[Data Models]
+    B --> E[Exception Handling]
+    C --> F[External Output]
 ```
 
 ### 컴포넌트 구조
 ```
-notification-service/
+yeonjae-universal-notification-service/
 ├── src/
-│   └── universal_notification_service/
-│       ├── __init__.py          # 공개 API (NotificationService, 모든 모델, 예외)
-│       ├── service.py           # 핵심 NotificationService 클래스
-│       ├── models.py            # 데이터 모델 (NotificationInput, Result 등)
-│       ├── exceptions.py        # 예외 정의 (10가지 세분화된 예외)
+│   └── universal_yeonjae-universal-notification-service/
+│       ├── __init__.py          # 공개 API
+│       ├── models.py            # 데이터 모델
+│       ├── service.py           # 핵심 서비스
+│       ├── exceptions.py        # 예외 정의
+│       ├── utils.py            # 유틸리티
 │       └── py.typed            # 타입 지원
 ├── tests/                      # 테스트 코드
 ├── docs/                       # 문서
@@ -59,174 +46,150 @@ notification-service/
 └── README.md                  # 기본 설명
 ```
 
+### 의존성 다이어그램
+```mermaid
+graph LR
+    A[모듈] --> B[pydantic]
+    A --> E[typing-extensions]
+    A --> F[requests]
+    
+    subgraph "선택적 의존성"
+        E[dev dependencies]
+        F[platform specific]
+    end
+```
+
 ## 📚 사용 설명서
+
+
 
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-notification-service
-
-# 모든 채널 지원
-pip install universal-notification-service[all]
+pip install universal-yeonjae-universal-notification-service
 
 # 개발 의존성 포함
-pip install universal-notification-service[dev]
+pip install universal-yeonjae-universal-notification-service[dev]
+
+# 모든 선택적 의존성 포함
+pip install universal-yeonjae-universal-notification-service[all]
 ```
 
 ### 기본 사용법
 ```python
-import asyncio
-from universal_notification_service import (
-    NotificationService, NotificationInput, NotificationChannel
+from universal_yeonjae-universal-notification-service import MainService
+
+# 기본 초기화
+service = MainService()
+
+# 주요 기능 사용
+result = service.main_function(input_data)
+```
+
+### 고급 사용법
+```python
+# 설정 커스터마이징
+config = YeonjaeUniversalNotificationServiceConfig(
+    option1="value1",
+    option2="value2"
 )
 
-# 서비스 초기화
-notification_service = NotificationService()
+service = MainService(config=config)
+
+# 비동기 사용 (해당하는 경우)
+import asyncio
 
 async def main():
-    # 알림 입력 데이터
-    notification = NotificationInput(
-        channel=NotificationChannel.SLACK,
-        recipient="@channel",
-        title="일일 개발 요약",
-        message="오늘의 개발 활동 요약입니다.",
-        channel_config={
-            "webhook_url": "https://hooks.slack.com/services/...",
-            "username": "DevBot"
-        }
-    )
-    
-    # 알림 전송
-    result = await notification_service.send_notification(notification)
-    
-    print(f"전송 결과: {result.status}")
-    print(f"전송 시간: {result.sent_at}")
-    print(f"메시지 ID: {result.message_id}")
+    result = await service.async_function(data)
+    return result
 
-# 실행
 asyncio.run(main())
-```
-
-### 채널별 사용법
-```python
-# Slack 알림
-slack_notification = NotificationInput(
-    channel=NotificationChannel.SLACK,
-    recipient="#dev-team",
-    title="배포 완료",
-    message="v1.0.0 배포가 성공적으로 완료되었습니다.",
-    channel_config={
-        "webhook_url": "https://hooks.slack.com/services/...",
-        "username": "DeployBot",
-        "icon_emoji": ":rocket:"
-    }
-)
-
-# 이메일 알림
-email_notification = NotificationInput(
-    channel=NotificationChannel.EMAIL,
-    recipient="team@example.com",
-    title="주간 개발 리포트",
-    message="이번 주 개발 현황을 요약해드립니다.",
-    channel_config={
-        "smtp_server": "smtp.gmail.com",
-        "smtp_port": 587,
-        "username": "sender@example.com",
-        "password": "app_password"
-    }
-)
-
-# Discord 알림
-discord_notification = NotificationInput(
-    channel=NotificationChannel.DISCORD,
-    recipient="general",
-    title="이슈 알림",
-    message="긴급 이슈가 발생했습니다.",
-    channel_config={
-        "webhook_url": "https://discord.com/api/webhooks/...",
-        "username": "AlertBot"
-    }
-)
-```
-
-### 배치 전송
-```python
-# 여러 수신자에게 동시 전송
-batch_input = BatchNotificationInput(
-    notifications=[
-        NotificationInput(channel=NotificationChannel.SLACK, recipient="#team1", ...),
-        NotificationInput(channel=NotificationChannel.EMAIL, recipient="user1@example.com", ...),
-        NotificationInput(channel=NotificationChannel.DISCORD, recipient="channel1", ...)
-    ]
-)
-
-batch_result = await notification_service.send_batch_notifications(batch_input)
-print(f"성공: {batch_result.success_count}, 실패: {batch_result.failure_count}")
 ```
 
 ## 🔄 입력/출력 데이터 구조
 
 ### 입력 데이터 스키마
-
-#### NotificationInput
 ```python
-@dataclass
-class NotificationInput:
-    channel: NotificationChannel        # SLACK, EMAIL, DISCORD, WEBHOOK
-    recipient: str                      # 수신자 정보
-    title: str                         # 알림 제목
-    message: str                       # 알림 내용
-    channel_config: Dict[str, Any]     # 채널별 설정
-    formatting_options: Optional[FormattingOptions]  # 포맷팅 옵션
-    template_id: Optional[str]         # 템플릿 ID
-    metadata: Optional[Dict[str, Any]] # 추가 메타데이터
+class InputModel(BaseModel):
+    """입력 데이터 모델"""
+    field1: str = Field(..., description="필수 문자열 필드")
+    field2: Optional[int] = Field(None, description="선택적 정수 필드")
+    field3: List[str] = Field(default_factory=list, description="문자열 리스트")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "field1": "example_value",
+                "field2": 123,
+                "field3": ["item1", "item2"]
+            }
+        }
 ```
 
 ### 출력 데이터 스키마
-
-#### NotificationResult
 ```python
-@dataclass
-class NotificationResult:
-    status: SendStatus                  # SUCCESS, FAILED, PENDING
-    message_id: Optional[str]          # 메시지 ID
-    sent_at: datetime                  # 전송 시간
-    delivery_attempts: List[DeliveryAttempt]  # 전송 시도 기록
-    error_message: Optional[str]       # 에러 메시지
-    metadata: Dict[str, Any]           # 추가 정보
+class OutputModel(BaseModel):
+    """출력 데이터 모델"""
+    success: bool = Field(..., description="처리 성공 여부")
+    result: Any = Field(..., description="처리 결과")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="메타데이터")
+    timestamp: datetime = Field(default_factory=datetime.now, description="처리 시간")
+```
+
+### 에러 응답 스키마
+```python
+class ErrorResponse(BaseModel):
+    """에러 응답 모델"""
+    error_code: str = Field(..., description="에러 코드")
+    error_message: str = Field(..., description="에러 메시지")
+    details: Optional[Dict[str, Any]] = Field(None, description="상세 정보")
 ```
 
 ## 🌊 데이터 흐름 시각화
 
-### 전체 알림 흐름
+### 전체 데이터 흐름
 ```mermaid
 sequenceDiagram
     participant Client
-    participant NotificationService
-    participant TemplateEngine
-    participant ChannelManager
+    participant yeonjae-universal-notification-service
     participant ExternalAPI
+    participant Database
     
-    Client->>+NotificationService: send_notification(input)
-    NotificationService->>+TemplateEngine: render_message(template, data)
-    TemplateEngine-->>-NotificationService: formatted_message
+    Client->>+yeonjae-universal-notification-service: Input Data
+    yeonjae-universal-notification-service->>+yeonjae-universal-notification-service: Validate Input
+    yeonjae-universal-notification-service->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-notification-service: API Response
+    yeonjae-universal-notification-service->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-notification-service: Data Response
+    yeonjae-universal-notification-service->>+yeonjae-universal-notification-service: Process & Transform
+    yeonjae-universal-notification-service-->>-Client: Output Result
+```
+
+### 내부 처리 흐름
+```mermaid
+flowchart TD
+    A[Input Validation] --> B{Valid?}
+    B -->|Yes| C[Core Processing]
+    B -->|No| D[Error Response]
+    C --> E[Data Transformation]
+    E --> F[Output Generation]
+    F --> G[Success Response]
     
-    NotificationService->>+ChannelManager: select_channel(channel_type)
-    ChannelManager-->>-NotificationService: channel_handler
-    
-    NotificationService->>+ExternalAPI: send_message(formatted_message)
-    ExternalAPI-->>-NotificationService: response
-    
-    NotificationService->>NotificationService: record_history()
-    NotificationService-->>-Client: NotificationResult
+    C --> H{External Call Needed?}
+    H -->|Yes| I[External API Call]
+    H -->|No| E
+    I --> J{API Success?}
+    J -->|Yes| E
+    J -->|No| K[Error Handling]
+    K --> D
 ```
 
 ## 🧪 테스트 전략
 
 ### 테스트 커버리지
 - **단위 테스트**: 95% 이상
-- **통합 테스트**: 실제 채널 연동 테스트
-- **모킹 테스트**: 외부 API 호출 모킹
+- **통합 테스트**: 주요 플로우 커버
+- **성능 테스트**: 응답 시간 기준
 
 ### 테스트 실행
 ```bash
@@ -234,7 +197,10 @@ sequenceDiagram
 pytest tests/ -v
 
 # 커버리지 포함
-pytest tests/ --cov=universal_notification_service --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-notification-service --cov-report=html
+
+# 성능 테스트
+pytest tests/test_performance.py -v
 ```
 
 ## 🔧 설정 및 환경변수
@@ -242,71 +208,131 @@ pytest tests/ --cov=universal_notification_service --cov-report=html
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `SLACK_WEBHOOK_URL` | Slack 웹훅 URL | None | 선택 |
-| `SMTP_SERVER` | SMTP 서버 주소 | None | 선택 |
-| `SMTP_USERNAME` | SMTP 사용자명 | None | 선택 |
-| `SMTP_PASSWORD` | SMTP 비밀번호 | None | 선택 |
-| `DISCORD_WEBHOOK_URL` | Discord 웹훅 URL | None | 선택 |
+| `yeonjae-universal-notification-service_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-notification-service_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-notification-service_DEBUG` | 디버그 모드 | False | 선택 |
+
+### 설정 파일 예시
+```yaml
+# config.yaml
+yeonjae-universal-notification-service:
+  api_key: "${API_KEY}"
+  timeout: 30
+  retry_count: 3
+  log_level: "INFO"
+```
 
 ## 📈 성능 지표
 
 ### 코드 품질
-- **테스트 커버리지**: 95.8%
-- **코드 라인 수**: 420 라인
-- **순환 복잡도**: 10
+- **테스트 커버리지**: 0.0%
+- **코드 라인 수**: 532 라인
+- **순환 복잡도**: 45
 
-### 벤치마크 결과
-- **Slack 전송 속도**: 평균 200ms
-- **이메일 전송 속도**: 평균 800ms
-- **Discord 전송 속도**: 평균 150ms
-- **배치 처리**: 100개 알림 동시 처리 가능
+### 확장성
+- **동시 처리**: 테스트 결과 기반으로 업데이트 예정
+- **메모리 사용량**: 프로파일링 결과 기반으로 업데이트 예정
+
+
+
+### 벤치마크
+- **처리 속도**: {수치} requests/second
+- **메모리 사용량**: 평균 {수치} MB
+- **응답 시간**: 평균 {수치} ms
+
+### 확장성
+- **동시 처리**: 최대 {수치} concurrent requests
+- **데이터 크기**: 최대 {수치} MB per request
 
 ## 🚨 에러 처리
 
 ### 에러 코드 정의
-| 코드 | 예외 클래스 | 설명 | 해결방법 |
-|------|-------------|------|----------|
-| `N001` | UnsupportedChannelException | 지원하지 않는 채널 | 지원 채널 목록 확인 |
-| `N002` | SendFailedException | 알림 전송 실패 | 네트워크 및 설정 확인 |
-| `N003` | InvalidRecipientException | 잘못된 수신자 | 수신자 정보 확인 |
-| `N004` | TemplateRenderException | 템플릿 렌더링 실패 | 템플릿 문법 확인 |
-| `N005` | ChannelNotConfiguredException | 채널 미설정 | 채널 설정 확인 |
+| 코드 | 설명 | 해결방법 |
+|------|------|----------|
+| `E001` | 입력 데이터 검증 실패 | 입력 스키마 확인 |
+| `E002` | 외부 API 호출 실패 | 네트워크 및 API 키 확인 |
+| `E003` | 내부 처리 오류 | 로그 확인 및 재시도 |
+
+### 로깅 전략
+```python
+import logging
+
+# 로거 설정
+logger = logging.getLogger('universal_yeonjae-universal-notification-service')
+logger.setLevel(logging.INFO)
+
+# 사용 예시
+logger.info("Processing started")
+logger.error("Error occurred: %s", error_message)
+```
 
 ## 🔗 관련 모듈 연동
 
+### 의존 모듈
+- `universal-http-api-client`: HTTP 통신
+- `universal-notification-service`: 알림 발송
+
 ### 연동 예시
 ```python
-from universal_notification_service import NotificationService, NotificationInput, NotificationChannel
-from universal_llm_service import LLMService
+from universal_yeonjae-universal-notification-service import MainService
+from universal_http_api_client import HTTPAPIClient
 
-# LLM 분석 결과를 알림으로 전송
-async def send_analysis_result(analysis_result):
-    notification = NotificationInput(
-        channel=NotificationChannel.SLACK,
-        recipient="#dev-team",
-        title="AI 분석 결과",
-        message=analysis_result.summary,
-        channel_config={"webhook_url": "..."}
-    )
-    
-    notification_service = NotificationService()
-    result = await notification_service.send_notification(notification)
-    return result
+# 모듈 간 연동
+api_client = HTTPAPIClient(platform=Platform.GITHUB)
+service = MainService(api_client=api_client)
 ```
 
 ## 📝 변경 이력
 
-### v1.0.0 (2024-01-15)
+### v1.0.0 (2024-01-XX)
 - 초기 릴리스
-- Slack, 이메일, Discord, Webhook 지원
-- 템플릿 시스템 구현
-- 배치 전송 기능
-- 재시도 메커니즘
-- 10가지 세분화된 예외 처리
-- 95% 이상 테스트 커버리지 달성
+- 핵심 기능 구현
+- 기본 테스트 커버리지 달성
+
+### v1.0.1 (2024-01-XX)
+- 버그 수정: {구체적 내용}
+- 성능 개선: {구체적 내용}
+- 문서 업데이트
+
+## 🤝 기여 가이드
+
+### 개발 환경 설정
+```bash
+# 저장소 클론
+git clone https://github.com/yeonjae-work/universal-modules.git
+
+# 개발 의존성 설치
+cd packages/yeonjae-universal-notification-service
+pip install -e ".[dev]"
+
+# 테스트 실행
+pytest tests/ -v
+```
+
+### 코드 스타일
+- **포매터**: Black
+- **린터**: Flake8
+- **타입 체커**: MyPy
+- **Import 정렬**: isort
+
+### Pull Request 가이드
+1. 기능 브랜치 생성
+2. 테스트 코드 작성
+3. 문서 업데이트
+4. PR 생성 및 리뷰 요청
+
+## 📞 지원 및 문의
+
+### 이슈 리포팅
+- **GitHub Issues**: [링크]
+- **이메일**: contact@codeping.ai
+
+### 커뮤니티
+- **Discord**: [링크]
+- **Slack**: [링크]
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2024-01-15 14:30:00  
-**다음 리뷰 예정**: 2024-02-15 
+**문서 버전**: v1.0.1  
+**마지막 업데이트**: 2025-06-28 10:20:21  
+**다음 리뷰 예정**: 2025-06-28 

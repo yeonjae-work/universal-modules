@@ -1,10 +1,10 @@
-# universal-schedule-manager 기술명세서
+# yeonjae-universal-schedule-manager 기술명세서
 
 ## 📖 모듈 개요
 
 ### 기본 정보
-- **모듈명**: universal-schedule-manager
-- **버전**: 1.0.0
+- **모듈명**: yeonjae-universal-schedule-manager
+- **버전**: 1.0.2
 - **최종 업데이트**: 2025-06-28
 - **담당자**: Universal Modules Team
 - **라이센스**: MIT
@@ -22,7 +22,7 @@ Universal schedule manager module for job scheduling and execution
 ### 시스템 구조
 ```mermaid
 graph TB
-    A[External Input] --> B[universal-schedule-manager]
+    A[External Input] --> B[yeonjae-universal-schedule-manager]
     B --> C[Core Service]
     B --> D[Data Models]
     B --> E[Exception Handling]
@@ -31,9 +31,9 @@ graph TB
 
 ### 컴포넌트 구조
 ```
-universal-schedule-manager/
+yeonjae-universal-schedule-manager/
 ├── src/
-│   └── universal_universal-schedule-manager/
+│   └── universal_yeonjae-universal-schedule-manager/
 │       ├── __init__.py          # 공개 API
 │       ├── models.py            # 데이터 모델
 │       ├── service.py           # 핵심 서비스
@@ -66,18 +66,18 @@ graph LR
 ### 설치 방법
 ```bash
 # 기본 설치
-pip install universal-universal-schedule-manager
+pip install universal-yeonjae-universal-schedule-manager
 
 # 개발 의존성 포함
-pip install universal-universal-schedule-manager[dev]
+pip install universal-yeonjae-universal-schedule-manager[dev]
 
 # 모든 선택적 의존성 포함
-pip install universal-universal-schedule-manager[all]
+pip install universal-yeonjae-universal-schedule-manager[all]
 ```
 
 ### 기본 사용법
 ```python
-from universal_universal-schedule-manager import MainService
+from universal_yeonjae-universal-schedule-manager import MainService
 
 # 기본 초기화
 service = MainService()
@@ -89,7 +89,7 @@ result = service.main_function(input_data)
 ### 고급 사용법
 ```python
 # 설정 커스터마이징
-config = UniversalScheduleManagerConfig(
+config = YeonjaeUniversalScheduleManagerConfig(
     option1="value1",
     option2="value2"
 )
@@ -151,18 +151,18 @@ class ErrorResponse(BaseModel):
 ```mermaid
 sequenceDiagram
     participant Client
-    participant universal-schedule-manager
+    participant yeonjae-universal-schedule-manager
     participant ExternalAPI
     participant Database
     
-    Client->>+universal-schedule-manager: Input Data
-    universal-schedule-manager->>+universal-schedule-manager: Validate Input
-    universal-schedule-manager->>+ExternalAPI: API Request
-    ExternalAPI-->>-universal-schedule-manager: API Response
-    universal-schedule-manager->>+Database: Store/Retrieve Data
-    Database-->>-universal-schedule-manager: Data Response
-    universal-schedule-manager->>+universal-schedule-manager: Process & Transform
-    universal-schedule-manager-->>-Client: Output Result
+    Client->>+yeonjae-universal-schedule-manager: Input Data
+    yeonjae-universal-schedule-manager->>+yeonjae-universal-schedule-manager: Validate Input
+    yeonjae-universal-schedule-manager->>+ExternalAPI: API Request
+    ExternalAPI-->>-yeonjae-universal-schedule-manager: API Response
+    yeonjae-universal-schedule-manager->>+Database: Store/Retrieve Data
+    Database-->>-yeonjae-universal-schedule-manager: Data Response
+    yeonjae-universal-schedule-manager->>+yeonjae-universal-schedule-manager: Process & Transform
+    yeonjae-universal-schedule-manager-->>-Client: Output Result
 ```
 
 ### 내부 처리 흐름
@@ -197,7 +197,7 @@ flowchart TD
 pytest tests/ -v
 
 # 커버리지 포함
-pytest tests/ --cov=universal_universal-schedule-manager --cov-report=html
+pytest tests/ --cov=universal_yeonjae-universal-schedule-manager --cov-report=html
 
 # 성능 테스트
 pytest tests/test_performance.py -v
@@ -208,14 +208,14 @@ pytest tests/test_performance.py -v
 ### 환경변수
 | 변수명 | 설명 | 기본값 | 필수여부 |
 |--------|------|--------|----------|
-| `universal-schedule-manager_API_KEY` | API 키 | None | 선택 |
-| `universal-schedule-manager_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
-| `universal-schedule-manager_DEBUG` | 디버그 모드 | False | 선택 |
+| `yeonjae-universal-schedule-manager_API_KEY` | API 키 | None | 선택 |
+| `yeonjae-universal-schedule-manager_TIMEOUT` | 타임아웃 (초) | 30 | 선택 |
+| `yeonjae-universal-schedule-manager_DEBUG` | 디버그 모드 | False | 선택 |
 
 ### 설정 파일 예시
 ```yaml
 # config.yaml
-universal-schedule-manager:
+yeonjae-universal-schedule-manager:
   api_key: "${API_KEY}"
   timeout: 30
   retry_count: 3
@@ -258,7 +258,7 @@ universal-schedule-manager:
 import logging
 
 # 로거 설정
-logger = logging.getLogger('universal_universal-schedule-manager')
+logger = logging.getLogger('universal_yeonjae-universal-schedule-manager')
 logger.setLevel(logging.INFO)
 
 # 사용 예시
@@ -274,7 +274,7 @@ logger.error("Error occurred: %s", error_message)
 
 ### 연동 예시
 ```python
-from universal_universal-schedule-manager import MainService
+from universal_yeonjae-universal-schedule-manager import MainService
 from universal_http_api_client import HTTPAPIClient
 
 # 모듈 간 연동
@@ -333,6 +333,6 @@ pytest tests/ -v
 
 ---
 
-**문서 버전**: v1.0.0  
-**마지막 업데이트**: 2025-06-28 18:03:46  
+**문서 버전**: v1.0.2  
+**마지막 업데이트**: 2025-06-28 10:20:21  
 **다음 리뷰 예정**: 2025-06-28 
