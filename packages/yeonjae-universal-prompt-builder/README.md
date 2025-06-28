@@ -18,7 +18,7 @@ pip install yeonjae-universal-prompt-builder
 ## 사용법
 
 ```python
-from universal_prompt_builder import PromptBuilder, PromptTemplate
+from yeonjae_universal_prompt_builder import PromptBuilder, PromptTemplate
 
 # 기본 사용법
 builder = PromptBuilder()

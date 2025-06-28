@@ -17,26 +17,26 @@ Universal notification service supporting Slack, Email, Discord, and webhooks fo
 
 ```bash
 # Basic installation
-pip install universal-notification-service
+pip install yeonjae-universal-notification-service
 
 # With Slack support
-pip install universal-notification-service[slack]
+pip install yeonjae-universal-notification-service[slack]
 
 # With Email support  
-pip install universal-notification-service[email]
+pip install yeonjae-universal-notification-service[email]
 
 # With Discord support
-pip install universal-notification-service[discord]
+pip install yeonjae-universal-notification-service[discord]
 
 # With all providers
-pip install universal-notification-service[all]
+pip install yeonjae-universal-notification-service[all]
 ```
 
 ## Quick Start
 
 ```python
 import asyncio
-from universal_notification_service import (
+from yeonjae_universal_notification_service import (
     NotificationService, NotificationInput, NotificationChannel,
     NotificationConfig, RecipientInfo
 )

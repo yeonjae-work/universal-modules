@@ -14,13 +14,13 @@ Universal HTTP API client with platform-specific adapters for GitHub, GitLab, Sl
 ## Installation
 
 ```bash
-pip install universal-http-api-client
+pip install yeonjae-universal-http-api-client
 ```
 
 ## Quick Start
 
 ```python
-from universal_http_api_client import HTTPAPIClient, Platform
+from yeonjae_universal_http_api_client import HTTPAPIClient, Platform
 
 # GitHub API
 client = HTTPAPIClient(Platform.GITHUB, "your-token")

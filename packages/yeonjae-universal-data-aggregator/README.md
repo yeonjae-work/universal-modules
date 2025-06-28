@@ -18,10 +18,10 @@
 
 ```bash
 # GitHub에서 직접 설치
-pip install git+https://github.com/yeonjae-work/universal-modules.git#subdirectory=packages/yeonjae-universal-data-aggregator
+pip install yeonjae-universal-data-aggregator
 
 # 개발 의존성과 함께 설치
-pip install "git+https://github.com/yeonjae-work/universal-modules.git#subdirectory=packages/yeonjae-universal-data-aggregator[dev]"
+pip install yeonjae-universal-data-aggregator[dev]
 ```
 
 ## 🚀 **빠른 시작**
@@ -30,7 +30,7 @@ pip install "git+https://github.com/yeonjae-work/universal-modules.git#subdirect
 
 ```python
 from datetime import datetime
-from universal_data_aggregator import (
+from yeonjae_universal_data_aggregator import (
     DataAggregatorService, AggregationInput, DateRange,
     CommitData, DiffInfo, DiffType
 )

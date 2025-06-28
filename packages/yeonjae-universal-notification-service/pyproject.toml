@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-notification-service"
-version = "1.0.1"
+version = "1.0.5"
 description = "Universal notification service supporting Slack, Email, Discord, and webhooks for automated reporting"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "MIT"}

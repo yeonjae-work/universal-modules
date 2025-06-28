@@ -16,23 +16,23 @@ Universal LLM service supporting OpenAI, Anthropic, and local models for code an
 
 ```bash
 # Basic installation
-pip install universal-llm-service
+pip install yeonjae-universal-llm-service
 
 # With OpenAI support
-pip install universal-llm-service[openai]
+pip install yeonjae-universal-llm-service[openai]
 
 # With Anthropic support
-pip install universal-llm-service[anthropic]
+pip install yeonjae-universal-llm-service[anthropic]
 
 # With all providers
-pip install universal-llm-service[all]
+pip install yeonjae-universal-llm-service[all]
 ```
 
 ## Quick Start
 
 ```python
 import asyncio
-from universal_llm_service import LLMService, LLMInput, LLMProvider, ModelConfig
+from yeonjae_universal_llm_service import LLMService, LLMInput, LLMProvider, ModelConfig
 
 async def main():
     # Initialize service

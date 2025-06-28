@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-prompt-builder"
-version = "1.0.2"
+version = "1.0.5"
 description = "Universal prompt builder module for creating dynamic prompts"
 authors = [{name = "Yeonjae", email = "dev@example.com"}]
 license = {text = "MIT"}

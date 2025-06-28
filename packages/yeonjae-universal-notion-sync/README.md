@@ -18,19 +18,19 @@ Universal synchronization engine for seamless Notion API integration.
 
 ```bash
 # Basic installation
-pip install universal-notion-sync
+pip install yeonjae-universal-notion-sync
 
 # With async support
-pip install universal-notion-sync[async]
+pip install yeonjae-universal-notion-sync[async]
 
 # With validation features
-pip install universal-notion-sync[validation]
+pip install yeonjae-universal-notion-sync[validation]
 
 # With Celery task support
-pip install universal-notion-sync[celery]
+pip install yeonjae-universal-notion-sync[celery]
 
 # With all features
-pip install universal-notion-sync[all]
+pip install yeonjae-universal-notion-sync[all]
 ```
 
 ## Quick Start
@@ -38,7 +38,7 @@ pip install universal-notion-sync[all]
 ### Basic Notion Sync
 
 ```python
-from universal_notion_sync import (
+from yeonjae_universal_notion_sync import (
     UniversalNotionSyncEngine, 
     NotionCredentials,
     SyncConfiguration,
@@ -88,7 +88,7 @@ print(f"Synced {result.successful_items} items successfully")
 ### Advanced Configuration
 
 ```python
-from universal_notion_sync import (
+from yeonjae_universal_notion_sync import (
     ConfigurationManager,
     RelationMapping,
     SyncStrategy
@@ -127,7 +127,7 @@ for target_result in batch_result.results:
 ### Content Processing
 
 ```python
-from universal_notion_sync import NotionContentProcessor, ContentFormat
+from yeonjae_universal_notion_sync import NotionContentProcessor, ContentFormat
 
 processor = NotionContentProcessor()
 
@@ -230,7 +230,7 @@ except SyncConfigurationError as e:
 
 ```python
 import asyncio
-from universal_notion_sync import AsyncUniversalNotionSyncEngine
+from yeonjae_universal_notion_sync import AsyncUniversalNotionSyncEngine
 
 async def async_sync_example():
     engine = AsyncUniversalNotionSyncEngine(credentials=credentials)

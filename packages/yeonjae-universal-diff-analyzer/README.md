@@ -5,5 +5,5 @@
 ## 설치
 
 ```bash
-pip install git+https://github.com/yeonjae-work/universal-modules.git#subdirectory=packages/yeonjae-universal-diff-analyzer
+pip install yeonjae-universal-diff-analyzer
 ```

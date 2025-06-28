@@ -16,19 +16,19 @@ Universal Git webhook data parser supporting GitHub, GitLab, and other SCM platf
 
 ```bash
 # Basic installation
-pip install universal-git-data-parser
+pip install yeonjae-universal-git-data-parser
 
 # With GitHub support
-pip install universal-git-data-parser[github]
+pip install yeonjae-universal-git-data-parser[github]
 
 # With GitLab support  
-pip install universal-git-data-parser[gitlab]
+pip install yeonjae-universal-git-data-parser[gitlab]
 
 # With validation features
-pip install universal-git-data-parser[validation]
+pip install yeonjae-universal-git-data-parser[validation]
 
 # With all features
-pip install universal-git-data-parser[all]
+pip install yeonjae-universal-git-data-parser[all]
 ```
 
 ## Quick Start
@@ -36,7 +36,7 @@ pip install universal-git-data-parser[all]
 ### GitHub Webhook Parsing
 
 ```python
-from universal_git_data_parser import GitDataParserService
+from yeonjae_universal_git_data_parser import GitDataParserService
 
 # Initialize parser
 parser = GitDataParserService()
@@ -70,7 +70,7 @@ print(f"Commits: {len(validated_event.commits)}")
 ### Advanced Usage
 
 ```python
-from universal_git_data_parser import (
+from yeonjae_universal_git_data_parser import (
     GitDataParserService, ValidatedEvent, CommitInfo
 )
 
