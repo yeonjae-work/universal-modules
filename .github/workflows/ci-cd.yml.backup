@@ -1,0 +1,838 @@
+name: Universal Modules CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+
+env:
+  PYTHON_VERSION: "3.11"
+  # GitHub 이메일 알림 비활성화
+  ACTIONS_RUNNER_DEBUG: false
+  ACTIONS_STEP_DEBUG: false
+
+jobs:
+  # 변경된 모듈 감지
+  detect-changes:
+    name: "변경된 모듈 감지"
+    runs-on: ubuntu-latest
+    outputs:
+      changed-modules: ${{ steps.changes.outputs.modules }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+      has-changes: ${{ steps.changes.outputs.has-changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 변경된 모듈 감지
+        id: changes
+        run: |
+          # 모든 모듈 목록을 packages 디렉터리에서 동적으로 가져오기
+          all_modules=$(ls -1 packages/ | tr '\n' ' ' | sed 's/ $//')
+          echo "🔍 전체 모듈: $all_modules"
+          
+          # 변경된 파일 확인
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR의 경우 base 브랜치와 비교
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+            changed_files=$(git diff --name-only $base_sha..$head_sha)
+          else
+            # Push의 경우 이전 커밋과 비교
+            if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+              changed_files=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }})
+            else
+              # 첫 번째 커밋인 경우 모든 파일
+              changed_files=$(git ls-files)
+            fi
+          fi
+          
+          echo "📄 변경된 파일들:"
+          echo "$changed_files"
+          
+          # 변경된 모듈 추출
+          changed_modules=""
+          for module in $all_modules; do
+            if echo "$changed_files" | grep -q "packages/$module/"; then
+              if [ -z "$changed_modules" ]; then
+                changed_modules="$module"
+              else
+                changed_modules="$changed_modules $module"
+              fi
+              echo "📦 변경 감지: $module"
+            fi
+          done
+          
+          # CI/CD 관련 파일이 변경된 경우 모든 모듈 처리
+          if echo "$changed_files" | grep -E "(\.github/workflows|scripts/|Makefile|pyproject\.toml)"; then
+            echo "🔧 CI/CD 파일 변경 감지 - 모든 모듈 처리"
+            changed_modules="$all_modules"
+          fi
+          
+          # 변경된 모듈이 없는 경우 처리
+          if [ -z "$changed_modules" ]; then
+            echo "📄 변경된 모듈 없음"
+            echo "modules=" >> $GITHUB_OUTPUT
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "📦 변경된 모듈: $changed_modules"
+            echo "modules=$changed_modules" >> $GITHUB_OUTPUT
+            
+            # Matrix 전략을 위한 JSON 생성 (한 줄로)
+            matrix_json='{"include":['
+            first=true
+            for module in $changed_modules; do
+              if [ "$first" = true ]; then
+                first=false
+              else
+                matrix_json="$matrix_json,"
+              fi
+              matrix_json="$matrix_json{\"module\":\"$module\"}"
+            done
+            matrix_json="$matrix_json]}"
+            
+            echo "matrix=$matrix_json" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "✅ 매트릭스 JSON: $matrix_json"
+          fi
+
+  # 코드 품질 검사
+  quality-check:
+    name: "코드 품질 검사"
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Python 환경 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 의존성 설치
+        run: |
+          cd packages/${{ matrix.module }}
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" || pip install -e .
+
+      - name: 코드 포맷팅 검사 (Black)
+        run: |
+          cd packages/${{ matrix.module }}
+          pip install black
+          black --check --diff src/ tests/ || true
+      
+      - name: Import 정렬 검사 (isort)
+        run: |
+          cd packages/${{ matrix.module }}
+          pip install isort
+          isort --check-only --diff src/ tests/ || true
+      
+      - name: 린팅 (flake8)
+        run: |
+          cd packages/${{ matrix.module }}
+          pip install flake8
+          flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 || true
+
+  # 테스트 실행
+  test:
+    name: "테스트 실행"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, quality-check]
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    strategy:
+      matrix: 
+        python-version: ["3.11"]
+        module: ${{ fromJson(needs.detect-changes.outputs.matrix).include[*].module }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Python ${{ matrix.python-version }} 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: 의존성 설치
+        run: |
+          cd packages/${{ matrix.module }}
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" || pip install -e .
+
+      - name: 테스트 실행
+        run: |
+          cd packages/${{ matrix.module }}
+          pip install pytest pytest-cov
+          pytest tests/ -v --cov=src/ --cov-report=xml --cov-report=term || true
+
+  # 패키지 빌드
+  build:
+    name: "패키지 빌드"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test]
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Python 환경 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 빌드 도구 설치
+        run: |
+          python -m pip install --upgrade pip build twine
+      
+      - name: 패키지 빌드
+        run: |
+          cd packages/${{ matrix.module }}
+          python -m build
+
+      - name: 빌드 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.module }}-dist
+          path: packages/${{ matrix.module }}/dist/
+
+  # 문서 업데이트
+  documentation:
+    name: "문서 업데이트"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Python 환경 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 문서 생성 도구 설치
+        run: |
+          python -m pip install --upgrade pip
+          pip install toml pydantic typing-extensions
+          cd packages/${{ matrix.module }}
+          pip install -e ".[dev]" || pip install -e .
+      
+      - name: 기술명세서 업데이트
+        run: |
+          python scripts/update-documentation.py ${{ matrix.module }}
+      
+      - name: 변경사항 확인
+        id: check-changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # docs 디렉터리가 존재하는지 확인
+          if [ ! -d "packages/${{ matrix.module }}/docs" ]; then
+            echo "📁 docs 디렉터리 생성: packages/${{ matrix.module }}/docs"
+            mkdir -p packages/${{ matrix.module }}/docs
+          fi
+          
+          # Git에 docs 디렉터리 추가 (존재하지 않는 경우)
+          git add packages/${{ matrix.module }}/docs/ || true
+          
+          # 변경사항 확인
+          if git diff --quiet HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "📄 ${{ matrix.module }}: 문서 변경사항 없음"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 ${{ matrix.module }}: 문서 업데이트 감지"
+            git diff --name-only HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null || echo "새로운 문서 파일 감지"
+          fi
+      
+      - name: 문서 변경사항 커밋
+        if: steps.check-changes.outputs.changes == 'true'
+        run: |
+          git add packages/${{ matrix.module }}/docs/
+          git commit -m "docs(${{ matrix.module }}): 기술명세서 자동 업데이트
+          
+          - API 문서 동기화
+          - 코드 구조 분석 반영
+          - 성능 메트릭 업데이트
+          
+          [skip ci]"
+      
+      - name: 문서 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-${{ matrix.module }}
+          path: packages/${{ matrix.module }}/docs/
+
+  # 문서 통합 및 푸시
+  docs-consolidate:
+    name: "문서 통합 및 푸시"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, documentation]
+    if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Git 설정
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: 최신 변경사항 가져오기
+        run: |
+          git pull origin main
+      
+      - name: 모든 문서 아티팩트 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          pattern: docs-*
+          path: ./docs-artifacts
+      
+      - name: 문서 아티팩트 복원
+        run: |
+          for module in ${{ needs.detect-changes.outputs.changed-modules }}; do
+            if [ -d "./docs-artifacts/docs-$module" ]; then
+              echo "📄 $module 문서 복원 중..."
+              cp -r "./docs-artifacts/docs-$module/"* "packages/$module/docs/" || true
+            fi
+          done
+      
+      - name: 통합 문서 변경사항 확인 및 푸시
+        run: |
+          # 모든 docs 디렉터리를 Git에 추가
+          git add packages/*/docs/ || true
+          
+          # 변경사항이 있는지 확인
+          if ! git diff --quiet --cached 2>/dev/null; then
+            echo "📚 통합 문서 업데이트 감지"
+            git commit -m "docs: 변경된 모듈 기술명세서 자동 업데이트
+            
+            🤖 자동 생성된 문서 업데이트:
+            - 변경된 모듈: ${{ needs.detect-changes.outputs.changed-modules }}
+            - API 구조 분석 및 동기화
+            - 코드 변경사항 반영
+            - 성능 메트릭 및 사용법 업데이트
+            
+            [skip ci]" || echo "커밋할 변경사항이 없습니다."
+            
+            git push origin main || echo "푸시할 변경사항이 없습니다."
+            echo "✅ 문서 업데이트 완료"
+          else
+            echo "📄 문서 변경사항 없음"
+          fi
+
+  # PyPI 배포 (main 브랜치만)
+  deploy:
+    name: "PyPI 배포"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build, docs-consolidate]
+    if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Python 환경 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 도구 설치
+        run: |
+          python -m pip install --upgrade pip twine toml semver
+      
+      - name: 빌드 아티팩트 다운로드
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.module }}-dist
+          path: packages/${{ matrix.module }}/dist/
+      
+      - name: 버전 변경 확인
+        id: version-check
+        run: |
+          cd packages/${{ matrix.module }}
+          current_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          
+          # 이전 태그와 비교
+          latest_tag=$(git tag -l "${{ matrix.module }}-v*" --sort=-version:refname | head -n1)
+          if [ -n "$latest_tag" ]; then
+            latest_version=${latest_tag#${{ matrix.module }}-v}
+            if [ "$current_version" != "$latest_version" ]; then
+              echo "version-changed=true" >> $GITHUB_OUTPUT
+              echo "new-version=$current_version" >> $GITHUB_OUTPUT
+              echo "📦 ${{ matrix.module }}: 버전 변경 감지 ($latest_version → $current_version)"
+            else
+              echo "version-changed=false" >> $GITHUB_OUTPUT
+              echo "📦 ${{ matrix.module }}: 버전 변경 없음 ($current_version)"
+            fi
+          else
+            echo "version-changed=true" >> $GITHUB_OUTPUT
+            echo "new-version=$current_version" >> $GITHUB_OUTPUT
+            echo "📦 ${{ matrix.module }}: 첫 번째 배포 ($current_version)"
+          fi
+      
+      - name: Git 태그 생성
+        if: steps.version-check.outputs.version-changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}" -m "${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
+          git push origin "${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}"
+          echo "🏷️ 태그 생성: ${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}"
+      
+      - name: PyPI 배포
+        if: steps.version-check.outputs.version-changed == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          cd packages/${{ matrix.module }}
+          
+          # pyproject.toml에서 실제 패키지명 추출 (toml 모듈 없이)
+          package_name=$(grep -E '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/' | tr -d '"')
+          echo "📦 실제 패키지명: $package_name"
+          
+          # 패키지명이 비어있으면 기본값 사용
+          if [ -z "$package_name" ]; then
+            package_name="yeonjae-${{ matrix.module }}"
+            echo "⚠️ 패키지명 추출 실패, 기본값 사용: $package_name"
+          fi
+          
+          if [ -n "${{ secrets.PYPI_API_TOKEN }}" ]; then
+            echo "🚀 PyPI 배포 시작: $package_name v${{ steps.version-check.outputs.new-version }}"
+            
+            # 실제 배포 전 검증
+            echo "📋 패키지 검증 중..."
+            if ! twine check dist/*; then
+              echo "❌ 패키지 검증 실패!"
+              exit 1
+            fi
+            echo "✅ 패키지 검증 완료"
+            
+            # 기존 버전 확인 (선택사항)
+            echo "🔍 기존 버전 확인 중..."
+            existing_version=$(pip index versions $package_name 2>/dev/null | grep "Available versions:" | head -1 || echo "신규 패키지")
+            echo "기존 버전: $existing_version"
+            
+            # 실제 배포
+            echo "🚀 PyPI 업로드 시작..."
+            if twine upload dist/* --verbose --skip-existing; then
+              echo "✅ PyPI 배포 완료: https://pypi.org/project/$package_name/"
+            else
+              echo "❌ PyPI 배포 실패!"
+              exit 1
+            fi
+          else
+            echo "⚠️ PYPI_API_TOKEN이 설정되지 않아 배포를 건너뜁니다."
+            echo "📦 패키지 검증만 수행합니다:"
+            twine check dist/*
+            echo "배포 시뮬레이션: $package_name v${{ steps.version-check.outputs.new-version }}"
+          fi
+      
+      - name: GitHub Release 생성
+        if: steps.version-check.outputs.version-changed == 'true'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}
+          name: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
+          body: |
+            ## ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
+            
+            🚀 **자동 배포된 릴리스입니다.**
+            
+            ### 📦 설치 방법
+            ```bash
+            # 실제 패키지명으로 설치 (yeonjae- 접두사 포함)
+            pip install yeonjae-${{ matrix.module }}==${{ steps.version-check.outputs.new-version }}
+            ```
+            
+            ### 📚 문서
+            - [기술명세서](https://github.com/${{ github.repository }}/blob/main/packages/${{ matrix.module }}/docs/technical-specification.md)
+            - [PyPI 페이지](https://pypi.org/project/yeonjae-${{ matrix.module }}/)
+            
+            ### 🔗 링크
+            - [GitHub Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [전체 변경사항](https://github.com/${{ github.repository }}/compare/${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}...main)
+          draft: false
+          prerelease: false
+
+  # 알림
+  notify:
+    name: "배포 알림"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, quality-check, test, build, documentation, docs-consolidate, deploy]
+    if: always()
+    
+    steps:
+      - name: 변경사항 없음 알림
+        if: needs.detect-changes.outputs.has-changes == 'false'
+        run: |
+          echo "📄 변경된 모듈이 없어 배포를 건너뜁니다."
+
+      - name: 배포 성공 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'success'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "🚀 Universal Modules 배포 성공!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "🚀 배포 완료"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*배포된 모듈:*\n${{ needs.detect-changes.outputs.changed-modules }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*브랜치:*\n${{ github.ref_name }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*커밋:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*작성자:*\n${{ github.actor }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "GitHub Actions 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      },
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "PyPI 확인"
+                        },
+                        "url": "https://pypi.org/search/?q=yeonjae"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 코드 품질 검사 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.quality-check.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "⚠️ Universal Modules 코드 품질 검사 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "⚠️ 코드 품질 검사 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "품질 검사 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 테스트 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.test.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "❌ Universal Modules 테스트 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "❌ 테스트 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "테스트 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 빌드 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.build.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "🔨 Universal Modules 빌드 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "🔨 빌드 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "빌드 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 문서 업데이트 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.documentation.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "📚 Universal Modules 문서 업데이트 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "📚 문서 업데이트 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "문서 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 배포 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "❌ Universal Modules 배포 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "❌ 배포 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*실패한 모듈:*\n${{ needs.detect-changes.outputs.changed-modules }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*브랜치:*\n${{ github.ref_name }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*커밋:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*작성자:*\n${{ github.actor }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "로그 확인하기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 전체 워크플로우 성공 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'skipped' && !contains(needs.*.result, 'failure')
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "✅ Universal Modules 처리 완료 (배포 없음)",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "✅ 처리 완료"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*상태:* 테스트/빌드 성공, 버전 변경 없어 배포 스킵\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "워크플로우 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi 

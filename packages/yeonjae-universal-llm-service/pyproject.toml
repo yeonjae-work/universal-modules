@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "yeonjae-universal-llm-service"
 version = "1.0.1"
 description = "Universal LLM service supporting OpenAI, Anthropic, and local models for code analysis and summarization"
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "MIT"}
 authors = [
     {name = "CodePing.AI Team", email = "contact@codeping.ai"}
