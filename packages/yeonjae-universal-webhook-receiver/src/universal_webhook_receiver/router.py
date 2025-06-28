@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     app_name: str = "Universal Webhook Receiver"
     debug: bool = False
     secret_key: str = "dev-secret-key"
+    github_webhook_secret: str = "dev-webhook-secret"
     
     class Config:
         env_file = ".env"
