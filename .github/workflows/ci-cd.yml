@@ -307,7 +307,7 @@ jobs:
           twine check dist/*
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.module }}-dist
           path: packages/${{ matrix.module }}/dist/
@@ -343,7 +343,7 @@ jobs:
           pip-audit --format=json --output=pip-audit-report.json || true
       
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-scan-${{ matrix.module }}
           path: |
@@ -381,7 +381,7 @@ jobs:
           pip install twine semver toml
       
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.module }}-dist
           path: packages/${{ matrix.module }}/dist/
@@ -431,12 +431,12 @@ jobs:
       
       - name: Create GitHub Release
         if: steps.version-check.outputs.version-changed == 'true'
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ matrix.module }}-v${{ steps.version-check.outputs.new-version }}
-          release_name: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
+          name: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
           body: |
             ## ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}
             
