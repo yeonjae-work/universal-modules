@@ -10,7 +10,7 @@ from datetime import datetime
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_data_storage.models import (
+    from yeonjae_universal_data_storage.models import (
         StorageStatus, CommitData, DiffData, StorageResult
     )
     
@@ -23,7 +23,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_data_storage.exceptions import (
+    from yeonjae_universal_data_storage.exceptions import (
         DataStorageException,
         DatabaseConnectionException,
         DuplicateDataException
@@ -36,7 +36,7 @@ def test_exceptions_import():
 
 def test_commit_data_creation():
     """CommitData 생성 테스트"""
-    from universal_data_storage.models import CommitData
+    from yeonjae_universal_data_storage.models import CommitData
     
     commit = CommitData(
         commit_hash="abc123",
@@ -56,7 +56,7 @@ def test_commit_data_creation():
 
 def test_diff_data_creation():
     """DiffData 생성 테스트"""
-    from universal_data_storage.models import DiffData
+    from yeonjae_universal_data_storage.models import DiffData
     
     diff = DiffData(
         file_path="test.py",
@@ -73,7 +73,7 @@ def test_diff_data_creation():
 
 def test_storage_result_creation():
     """StorageResult 생성 테스트"""
-    from universal_data_storage.models import StorageResult, StorageStatus
+    from yeonjae_universal_data_storage.models import StorageResult, StorageStatus
     
     result = StorageResult(
         success=True,
@@ -89,7 +89,7 @@ def test_storage_result_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_data_storage.exceptions import DuplicateDataException
+    from yeonjae_universal_data_storage.exceptions import DuplicateDataException
     
     exception = DuplicateDataException("test_hash", {"id": 123})
     

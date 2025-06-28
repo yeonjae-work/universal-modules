@@ -9,13 +9,13 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, List
 
-from universal_data_retriever.service import DataRetrieverService, CacheManager
-from universal_data_retriever.models import (
+from yeonjae_universal_data_retriever.service import DataRetrieverService, CacheManager
+from yeonjae_universal_data_retriever.models import (
     QueryParams, CommitQueryResult, DiffQueryResult, CommitInfo,
     DiffInfo, QueryMetadata, DeveloperStatistics, ActiveDeveloper,
     FilterCondition, FilterOperator, DateRangeQuery
 )
-from universal_data_retriever.exceptions import (
+from yeonjae_universal_data_retriever.exceptions import (
     DataRetrieverException, InvalidQueryException, DataNotFoundException,
     QueryExecutionException, DatabaseConnectionException
 )
@@ -87,20 +87,26 @@ class TestDataRetrieverService:
         assert service.cache_manager is not None
         assert hasattr(service, 'logger')
     
-    @patch('universal_data_retriever.service.select')
-    @patch('universal_data_retriever.service.Event')
+    @patch('yeonjae_universal_data_retriever.service.select')
+    @patch('yeonjae_universal_data_retriever.service.Event')
     def test_get_commits_by_developer_success(self, mock_event, mock_select, service):
         """개발자별 커밋 조회 성공 테스트"""
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        service.db_session = mock_session
+        
         # Mock 데이터 설정
         mock_event_instance = Mock()
         mock_event_instance.id = 1
         mock_event_instance.pusher = "john.doe@example.com"
-        mock_event_instance.created_at = datetime.now()
-        mock_event_instance.payload = '{"head_commit": {"message": "Test commit", "id": "abc123"}}'
-        mock_event_instance.ref = "refs/heads/main"
-        mock_event_instance.commit_sha = "abc123"
-        mock_event_instance.repository = "test-repo"
         mock_event_instance.author_email = "john.doe@example.com"
+        mock_event_instance.created_at = datetime.now()
+        mock_event_instance.commit_sha = "abc123"
+        mock_event_instance.payload = "{}"
+        mock_event_instance.ref = "refs/heads/main"
+        mock_event_instance.repository = "test-repo"
         mock_event_instance.files_changed = 2
         mock_event_instance.added_lines = 10
         mock_event_instance.deleted_lines = 5
@@ -110,7 +116,7 @@ class TestDataRetrieverService:
         mock_scalars.all.return_value = [mock_event_instance]
         mock_execute = Mock()
         mock_execute.scalars.return_value = mock_scalars
-        service.db_session.execute.return_value = mock_execute
+        mock_session.execute.return_value = mock_execute
         
         # 테스트 실행
         date_range = {
@@ -132,6 +138,12 @@ class TestDataRetrieverService:
     
     def test_get_commits_by_developer_cache_hit(self, service):
         """개발자별 커밋 조회 캐시 히트 테스트"""
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        service.db_session = mock_session
+        
         # 캐시에 데이터 미리 저장
         cached_data = {
             "commits": [],
@@ -167,15 +179,21 @@ class TestDataRetrieverService:
         assert isinstance(result, CommitQueryResult)
         assert len(result.commits) == 0
     
-    @patch('universal_data_retriever.service.select')
+    @patch('yeonjae_universal_data_retriever.service.select')
     def test_get_commits_by_developer_no_data(self, mock_select, service):
         """개발자별 커밋 조회 데이터 없음 테스트"""
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        service.db_session = mock_session
+        
         # Mock 빈 결과
         mock_scalars = Mock()
         mock_scalars.all.return_value = []
         mock_execute = Mock()
         mock_execute.scalars.return_value = mock_scalars
-        service.db_session.execute.return_value = mock_execute
+        mock_session.execute.return_value = mock_execute
         
         # 테스트 실행
         date_range = {
@@ -210,25 +228,24 @@ class TestDataRetrieverService:
                 date_range=date_range
             )
     
-    @patch('universal_data_retriever.service.select')
+    @patch('yeonjae_universal_data_retriever.service.select')
     def test_get_active_developers(self, mock_select, service):
         """활성 개발자 목록 조회 테스트"""
-        # Mock 데이터 설정
-        mock_event = Mock()
-        mock_event.pusher = "john.doe@example.com"
-        mock_event.author_email = "john.doe@example.com"
-        mock_event.created_at = datetime.now()
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        service.db_session = mock_session
         
+        # Mock 데이터 설정
         mock_result = Mock()
         mock_result.pusher = "john.doe@example.com"
         mock_result.commit_count = 5
         mock_result.last_activity = datetime.now()
         
-        mock_scalars = Mock()
-        mock_scalars.all.return_value = [mock_result]
         mock_execute = Mock()
-        mock_execute.scalars.return_value = mock_scalars
-        service.db_session.execute.return_value = mock_execute
+        mock_execute.all.return_value = [mock_result]
+        mock_session.execute.return_value = mock_execute
         
         # 테스트 실행
         date_range = {
@@ -242,24 +259,25 @@ class TestDataRetrieverService:
         assert isinstance(result, list)
         # Mock 데이터의 구조에 따라 결과가 달라질 수 있음
     
-    @patch('universal_data_retriever.service.select')
+    @patch('yeonjae_universal_data_retriever.service.select')
     def test_get_developer_statistics(self, mock_select, service):
         """개발자 통계 조회 테스트"""
-        # Mock 데이터 설정
-        mock_event = Mock()
-        mock_event.id = 1
-        mock_event.pusher = "john.doe@example.com"
-        mock_event.created_at = datetime.now()
-        mock_event.repository = "test-repo"
-        mock_event.added_lines = 10
-        mock_event.deleted_lines = 5
-        mock_event.files_changed = 2
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        service.db_session = mock_session
         
-        mock_scalars = Mock()
-        mock_scalars.all.return_value = [mock_event]
+        # Mock 데이터 설정
+        mock_result = Mock()
+        mock_result.total_commits = 10
+        mock_result.repositories = 2
+        mock_result.active_days = 5
+        
         mock_execute = Mock()
-        mock_execute.scalars.return_value = mock_scalars
-        service.db_session.execute.return_value = mock_execute
+        mock_execute.first.return_value = mock_result
+        mock_execute.all.return_value = [("test-repo",)]
+        mock_session.execute.return_value = mock_execute
         
         # 테스트 실행
         date_range = {
@@ -278,8 +296,19 @@ class TestDataRetrieverService:
     
     def test_get_daily_summary(self, service):
         """일일 요약 조회 테스트"""
+        # Mock 세션을 컨텍스트 매니저로 설정
+        mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
+        
         # Mock 데이터베이스 응답
-        service.db_session.execute = Mock()
+        mock_scalars = Mock()
+        mock_scalars.all.return_value = []
+        mock_execute = Mock()
+        mock_execute.scalars.return_value = mock_scalars
+        mock_session.execute.return_value = mock_execute
+        
+        service.db_session = mock_session
         
         # 테스트 실행
         result = service.get_daily_summary()
@@ -303,10 +332,10 @@ class TestDataRetrieverService:
     def test_detect_language(self, service):
         """언어 감지 테스트"""
         # Python 파일
-        assert service._detect_language("test.py") == "python"
+        assert service._detect_language("test.py") == "Python"
         
         # JavaScript 파일
-        assert service._detect_language("test.js") == "javascript"
+        assert service._detect_language("test.js") == "JavaScript"
         
         # 알 수 없는 확장자
         assert service._detect_language("test.unknown") is None
@@ -314,7 +343,7 @@ class TestDataRetrieverService:
         # 확장자 없는 파일
         assert service._detect_language("README") is None
     
-    @patch('universal_data_retriever.service.get_session')
+    @patch('yeonjae_universal_data_retriever.service.get_session')
     def test_get_session_context_manager(self, mock_get_session, service):
         """세션 컨텍스트 매니저 테스트"""
         # db_session이 None인 경우
@@ -331,6 +360,8 @@ class TestDataRetrieverService:
         """기존 세션 사용 테스트"""
         # db_session이 이미 설정된 경우
         mock_session = Mock()
+        mock_session.__enter__ = Mock(return_value=mock_session)
+        mock_session.__exit__ = Mock(return_value=None)
         service.db_session = mock_session
         
         with service._get_session() as session:
@@ -350,7 +381,7 @@ class TestDataRetrieverServiceIntegration:
         assert service_no_session.db_session is None
         assert service_no_session.cache_manager is not None
     
-    @patch('universal_data_retriever.service.get_session')
+    @patch('yeonjae_universal_data_retriever.service.get_session')
     def test_auto_session_management(self, mock_get_session, service_no_session):
         """자동 세션 관리 테스트"""
         # Mock 세션 설정

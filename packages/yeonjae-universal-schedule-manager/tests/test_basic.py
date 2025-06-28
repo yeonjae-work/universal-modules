@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_schedule_manager.models import (
+    from yeonjae_universal_schedule_manager.models import (
         ScheduleType, ScheduleStatus, ScheduleConfig,
         ScheduleRequest, ScheduleResponse, JobExecution
     )
@@ -25,7 +25,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_schedule_manager.exceptions import (
+    from yeonjae_universal_schedule_manager.exceptions import (
         ScheduleManagerException,
         InvalidScheduleException,
         JobExecutionException
@@ -38,7 +38,7 @@ def test_exceptions_import():
 
 def test_schedule_config_creation():
     """ScheduleConfig 생성 테스트"""
-    from universal_schedule_manager.models import ScheduleConfig, ScheduleType
+    from yeonjae_universal_schedule_manager.models import ScheduleConfig, ScheduleType
     
     config = ScheduleConfig(
         schedule_type=ScheduleType.CRON,
@@ -53,7 +53,7 @@ def test_schedule_config_creation():
 
 def test_schedule_request_creation():
     """ScheduleRequest 생성 테스트"""
-    from universal_schedule_manager.models import ScheduleRequest, ScheduleType, ScheduleConfig
+    from yeonjae_universal_schedule_manager.models import ScheduleRequest, ScheduleType, ScheduleConfig
     
     request = ScheduleRequest(
         name="daily_report",
@@ -73,7 +73,7 @@ def test_schedule_request_creation():
 
 def test_job_execution_creation():
     """JobExecution 생성 테스트"""
-    from universal_schedule_manager.models import JobExecution
+    from yeonjae_universal_schedule_manager.models import JobExecution
     
     execution = JobExecution(
         job_id="job_123",
@@ -89,7 +89,7 @@ def test_job_execution_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_schedule_manager.exceptions import InvalidScheduleException
+    from yeonjae_universal_schedule_manager.exceptions import InvalidScheduleException
     
     exception = InvalidScheduleException("invalid_cron", "0 25 * * *")
     

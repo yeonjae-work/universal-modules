@@ -9,7 +9,7 @@ import pytest
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_diff_analyzer.models import (
+    from yeonjae_universal_diff_analyzer.models import (
         ChangeType, FileType, DiffLine, FileChange, 
         DiffAnalysis, CodeComplexity, AnalysisResult
     )
@@ -24,7 +24,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_diff_analyzer.exceptions import (
+    from yeonjae_universal_diff_analyzer.exceptions import (
         DiffAnalyzerException,
         InvalidDiffFormatException,
         AnalysisException
@@ -37,7 +37,7 @@ def test_exceptions_import():
 
 def test_diff_line_creation():
     """DiffLine 생성 테스트"""
-    from universal_diff_analyzer.models import DiffLine
+    from yeonjae_universal_diff_analyzer.models import DiffLine
     
     line = DiffLine(
         line_number=10,
@@ -52,7 +52,7 @@ def test_diff_line_creation():
 
 def test_file_change_creation():
     """FileChange 생성 테스트"""
-    from universal_diff_analyzer.models import FileChange, ChangeType, FileType
+    from yeonjae_universal_diff_analyzer.models import FileChange, ChangeType, FileType
     
     change = FileChange(
         file_path="src/main.py",
@@ -73,7 +73,7 @@ def test_file_change_creation():
 
 def test_code_complexity_creation():
     """CodeComplexity 생성 테스트"""
-    from universal_diff_analyzer.models import CodeComplexity
+    from yeonjae_universal_diff_analyzer.models import CodeComplexity
     
     complexity = CodeComplexity(
         cyclomatic_complexity=5,
@@ -90,7 +90,7 @@ def test_code_complexity_creation():
 
 def test_analysis_result_creation():
     """AnalysisResult 생성 테스트"""
-    from universal_diff_analyzer.models import AnalysisResult, CodeComplexity
+    from yeonjae_universal_diff_analyzer.models import AnalysisResult, CodeComplexity
     
     complexity = CodeComplexity(
         cyclomatic_complexity=5,
@@ -116,7 +116,7 @@ def test_analysis_result_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_diff_analyzer.exceptions import InvalidDiffFormatException
+    from yeonjae_universal_diff_analyzer.exceptions import InvalidDiffFormatException
     
     exception = InvalidDiffFormatException("Invalid diff header", "@@invalid@@")
     

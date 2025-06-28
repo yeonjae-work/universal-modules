@@ -8,7 +8,7 @@ import pytest
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-from universal_data_retriever.models import (
+from yeonjae_universal_data_retriever.models import (
     FilterOperator, SortDirection, FilterCondition, SortOption,
     PaginationConfig, QueryParams, QueryMetadata, CommitInfo,
     DiffInfo, DeveloperInfo, CommitQueryResult, DiffQueryResult,

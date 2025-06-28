@@ -4,7 +4,7 @@ Tests for universal_prompt_builder.models
 
 import pytest
 from datetime import datetime
-from universal_prompt_builder.models import (
+from yeonjae_universal_prompt_builder.models import (
     PromptType,
     CustomizationOptions,
     TemplateConfig,

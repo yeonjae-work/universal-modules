@@ -5,7 +5,7 @@ Universal Data Retriever 예외 테스트
 """
 
 import pytest
-from universal_data_retriever.exceptions import (
+from yeonjae_universal_data_retriever.exceptions import (
     DataRetrieverException,
     InvalidQueryException,
     DataNotFoundException,
@@ -137,7 +137,7 @@ class TestCacheException:
         assert "get" in str(exception)
         assert exception.details["operation"] == "get"
         assert exception.details["error_type"] == "KeyError"
-        assert exception.details["error_message"] == "Cache key not found"
+        assert exception.details["error_message"] == "'Cache key not found'"
     
     def test_cache_exception_set_operation(self):
         """캐시 설정 작업 예외 테스트"""

@@ -8,8 +8,8 @@ from typing import Any, Dict, Mapping
 
 from fastapi import HTTPException, status
 
-from universal_git_data_parser.service import GitDataParserService
-from universal_git_data_parser.models import ValidatedEvent
+from yeonjae_universal_git_data_parser.service import GitDataParserService
+from yeonjae_universal_git_data_parser.models import ValidatedEvent
 # Simplified task queue for standalone operation
 class MockCeleryApp:
     def send_task(self, task_name: str, args=None, kwargs=None):

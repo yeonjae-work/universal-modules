@@ -27,8 +27,8 @@ class Settings(BaseSettings):
 
 def get_settings() -> Settings:
     return Settings()
-from universal_git_data_parser.models import ValidatedEvent
-from universal_webhook_receiver.service import WebhookService
+from yeonjae_universal_git_data_parser.models import ValidatedEvent
+from yeonjae_universal_webhook_receiver.service import WebhookService
 
 router = APIRouter(prefix="/webhook", tags=["webhook"])
 

@@ -5,7 +5,7 @@ Universal Notification Service 기본 테스트
 import pytest
 import asyncio
 from datetime import datetime
-from universal_notification_service import (
+from yeonjae_universal_notification_service import (
     NotificationService,
     NotificationInput,
     NotificationChannel,
@@ -23,7 +23,7 @@ def test_version():
 
 def test_import():
     """패키지 import 테스트"""
-    from universal_notification_service import (
+    from yeonjae_universal_notification_service import (
         NotificationService, NotificationInput, NotificationResult,
         NotificationChannel, NotificationConfig, RecipientInfo
     )
@@ -120,7 +120,7 @@ def test_basic_functionality():
 
 def test_formatting_options():
     """FormattingOptions 테스트"""
-    from universal_notification_service import FormattingOptions
+    from yeonjae_universal_notification_service import FormattingOptions
     
     formatting = FormattingOptions()
     assert formatting is not None
@@ -128,7 +128,7 @@ def test_formatting_options():
 
 def test_delivery_attempt():
     """DeliveryAttempt 테스트"""
-    from universal_notification_service import DeliveryAttempt
+    from yeonjae_universal_notification_service import DeliveryAttempt
     
     # 필수 매개변수와 함께 생성
     attempt = DeliveryAttempt(
@@ -172,7 +172,7 @@ async def test_mock_notification():
 
 def test_exception_classes():
     """예외 클래스 테스트"""
-    from universal_notification_service import (
+    from yeonjae_universal_notification_service import (
         NotificationServiceException,
         UnsupportedChannelException,
         SendFailedException
@@ -185,7 +185,7 @@ def test_exception_classes():
 
 def test_batch_classes():
     """Batch 관련 클래스 테스트"""
-    from universal_notification_service import (
+    from yeonjae_universal_notification_service import (
         BatchNotificationInput,
         BatchNotificationResult,
         NotificationMetrics

@@ -10,7 +10,7 @@ from datetime import datetime
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_webhook_receiver.models import (
+    from yeonjae_universal_webhook_receiver.models import (
         WebhookSource, WebhookStatus, WebhookPayload,
         WebhookRequest, WebhookResponse, ProcessingResult
     )
@@ -25,7 +25,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_webhook_receiver.exceptions import (
+    from yeonjae_universal_webhook_receiver.exceptions import (
         WebhookReceiverException,
         InvalidWebhookException,
         ProcessingException
@@ -38,7 +38,7 @@ def test_exceptions_import():
 
 def test_webhook_payload_creation():
     """WebhookPayload 생성 테스트"""
-    from universal_webhook_receiver.models import WebhookPayload, WebhookSource
+    from yeonjae_universal_webhook_receiver.models import WebhookPayload, WebhookSource
     
     payload = WebhookPayload(
         source=WebhookSource.GITHUB,
@@ -55,7 +55,7 @@ def test_webhook_payload_creation():
 
 def test_webhook_request_creation():
     """WebhookRequest 생성 테스트"""
-    from universal_webhook_receiver.models import WebhookRequest, WebhookSource
+    from yeonjae_universal_webhook_receiver.models import WebhookRequest, WebhookSource
     
     request = WebhookRequest(
         source=WebhookSource.GITHUB,
@@ -72,7 +72,7 @@ def test_webhook_request_creation():
 
 def test_processing_result_creation():
     """ProcessingResult 생성 테스트"""
-    from universal_webhook_receiver.models import ProcessingResult, WebhookStatus
+    from yeonjae_universal_webhook_receiver.models import ProcessingResult, WebhookStatus
     
     result = ProcessingResult(
         webhook_id="webhook_123",
@@ -90,7 +90,7 @@ def test_processing_result_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_webhook_receiver.exceptions import InvalidWebhookException
+    from yeonjae_universal_webhook_receiver.exceptions import InvalidWebhookException
     
     exception = InvalidWebhookException("github", "Invalid signature")
     

@@ -1,44 +1,48 @@
-"""Basic tests for universal-notion-sync package."""
+"""
+Universal Notion Sync 기본 테스트
+
+모듈의 기본 임포트와 구조를 테스트합니다.
+"""
 
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 from enum import Enum
 
-import universal_notion_sync
+import yeonjae_universal_notion_sync
 
 
 def test_package_version():
     """Test package version is accessible."""
-    assert hasattr(universal_notion_sync, '__version__')
-    assert universal_notion_sync.__version__ == "1.0.0"
+    assert hasattr(yeonjae_universal_notion_sync, '__version__')
+    assert yeonjae_universal_notion_sync.__version__ == "1.0.0"
 
 
 def test_package_imports():
     """Test main imports are available."""
     # Core services
-    assert hasattr(universal_notion_sync, 'UniversalNotionSyncEngine')
-    assert hasattr(universal_notion_sync, 'NotionAPIClient')
-    assert hasattr(universal_notion_sync, 'NotionContentProcessor')
-    assert hasattr(universal_notion_sync, 'RelationDiscoveryEngine')
-    assert hasattr(universal_notion_sync, 'ConfigurationManager')
+    assert hasattr(yeonjae_universal_notion_sync, 'UniversalNotionSyncEngine')
+    assert hasattr(yeonjae_universal_notion_sync, 'NotionAPIClient')
+    assert hasattr(yeonjae_universal_notion_sync, 'NotionContentProcessor')
+    assert hasattr(yeonjae_universal_notion_sync, 'RelationDiscoveryEngine')
+    assert hasattr(yeonjae_universal_notion_sync, 'ConfigurationManager')
     
     # Models
-    assert hasattr(universal_notion_sync, 'NotionCredentials')
-    assert hasattr(universal_notion_sync, 'SyncTarget')
-    assert hasattr(universal_notion_sync, 'SyncConfiguration')
-    assert hasattr(universal_notion_sync, 'SyncResult')
-    assert hasattr(universal_notion_sync, 'BatchSyncResult')
+    assert hasattr(yeonjae_universal_notion_sync, 'NotionCredentials')
+    assert hasattr(yeonjae_universal_notion_sync, 'SyncTarget')
+    assert hasattr(yeonjae_universal_notion_sync, 'SyncConfiguration')
+    assert hasattr(yeonjae_universal_notion_sync, 'SyncResult')
+    assert hasattr(yeonjae_universal_notion_sync, 'BatchSyncResult')
     
     # Enums
-    assert hasattr(universal_notion_sync, 'SyncStrategy')
-    assert hasattr(universal_notion_sync, 'ContentFormat')
-    assert hasattr(universal_notion_sync, 'RelationDiscoveryMode')
+    assert hasattr(yeonjae_universal_notion_sync, 'SyncStrategy')
+    assert hasattr(yeonjae_universal_notion_sync, 'ContentFormat')
+    assert hasattr(yeonjae_universal_notion_sync, 'RelationDiscoveryMode')
 
 
 def test_sync_strategy_enum():
     """Test SyncStrategy enum values."""
-    from universal_notion_sync import SyncStrategy
+    from yeonjae_universal_notion_sync import SyncStrategy
     
     assert isinstance(SyncStrategy.FULL_SYNC, SyncStrategy)
     assert isinstance(SyncStrategy.INCREMENTAL, SyncStrategy)
@@ -47,7 +51,7 @@ def test_sync_strategy_enum():
 
 def test_content_format_enum():
     """Test ContentFormat enum values."""
-    from universal_notion_sync import ContentFormat
+    from yeonjae_universal_notion_sync import ContentFormat
     
     assert isinstance(ContentFormat.MARKDOWN, ContentFormat)
     assert isinstance(ContentFormat.JSON, ContentFormat)
@@ -55,7 +59,7 @@ def test_content_format_enum():
 
 def test_relation_discovery_mode_enum():
     """Test RelationDiscoveryMode enum values."""
-    from universal_notion_sync import RelationDiscoveryMode
+    from yeonjae_universal_notion_sync import RelationDiscoveryMode
     
     assert isinstance(RelationDiscoveryMode.DISABLED, RelationDiscoveryMode)
     assert isinstance(RelationDiscoveryMode.SHALLOW, RelationDiscoveryMode)
@@ -65,7 +69,7 @@ def test_relation_discovery_mode_enum():
 
 def test_notion_credentials_model():
     """Test NotionCredentials model creation."""
-    from universal_notion_sync import NotionCredentials
+    from yeonjae_universal_notion_sync import NotionCredentials
     
     credentials = NotionCredentials(
         token="secret_token_123",
@@ -78,7 +82,7 @@ def test_notion_credentials_model():
 
 def test_sync_configuration_model():
     """Test SyncConfiguration model creation."""
-    from universal_notion_sync import SyncConfiguration, NotionCredentials, RelationDiscoveryMode
+    from yeonjae_universal_notion_sync import SyncConfiguration, NotionCredentials, RelationDiscoveryMode
     
     credentials = NotionCredentials(token="test_token")
     config = SyncConfiguration(
@@ -94,7 +98,7 @@ def test_sync_configuration_model():
 
 def test_sync_target_model():
     """Test SyncTarget model creation."""
-    from universal_notion_sync import SyncTarget, SyncStrategy, ContentFormat
+    from yeonjae_universal_notion_sync import SyncTarget, SyncStrategy, ContentFormat
     
     target = SyncTarget(
         id="db_123456",
@@ -115,7 +119,7 @@ def test_sync_target_model():
 
 def test_notion_api_client_creation():
     """Test NotionAPIClient instantiation."""
-    from universal_notion_sync import NotionAPIClient, NotionCredentials
+    from yeonjae_universal_notion_sync import NotionAPIClient, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
     client = NotionAPIClient(credentials=credentials)
@@ -129,7 +133,7 @@ def test_notion_api_client_creation():
 
 def test_notion_content_processor_creation():
     """Test NotionContentProcessor instantiation."""
-    from universal_notion_sync import NotionContentProcessor, NotionAPIClient, NotionCredentials
+    from yeonjae_universal_notion_sync import NotionContentProcessor, NotionAPIClient, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
     api_client = NotionAPIClient(credentials=credentials)
@@ -142,7 +146,7 @@ def test_notion_content_processor_creation():
 
 def test_relation_discovery_engine_creation():
     """Test RelationDiscoveryEngine instantiation."""
-    from universal_notion_sync import RelationDiscoveryEngine, NotionAPIClient, NotionContentProcessor, NotionCredentials
+    from yeonjae_universal_notion_sync import RelationDiscoveryEngine, NotionAPIClient, NotionContentProcessor, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
     api_client = NotionAPIClient(credentials=credentials)
@@ -156,7 +160,7 @@ def test_relation_discovery_engine_creation():
 
 def test_universal_notion_sync_engine_creation():
     """Test UniversalNotionSyncEngine instantiation."""
-    from universal_notion_sync import UniversalNotionSyncEngine, SyncConfiguration, NotionCredentials
+    from yeonjae_universal_notion_sync import UniversalNotionSyncEngine, SyncConfiguration, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
     config = SyncConfiguration(credentials=credentials)
@@ -170,7 +174,7 @@ def test_universal_notion_sync_engine_creation():
 
 def test_configuration_manager_creation():
     """Test ConfigurationManager instantiation."""
-    from universal_notion_sync import ConfigurationManager
+    from yeonjae_universal_notion_sync import ConfigurationManager
     
     manager = ConfigurationManager()
     
@@ -180,7 +184,7 @@ def test_configuration_manager_creation():
 
 def test_notion_sync_config_creation():
     """Test NotionSyncConfig instantiation."""
-    from universal_notion_sync import NotionSyncConfig
+    from yeonjae_universal_notion_sync import NotionSyncConfig
     
     config = NotionSyncConfig()
     
@@ -191,7 +195,7 @@ def test_notion_sync_config_creation():
 
 def test_sync_result_model():
     """Test SyncResult model creation."""
-    from universal_notion_sync import SyncResult
+    from yeonjae_universal_notion_sync import SyncResult
     
     # Check actual field names from the model
     start_time = datetime.now()
@@ -217,7 +221,7 @@ def test_sync_result_model():
 
 def test_batch_sync_result_model():
     """Test BatchSyncResult model creation."""
-    from universal_notion_sync import BatchSyncResult, SyncResult
+    from yeonjae_universal_notion_sync import BatchSyncResult, SyncResult
     
     start_time = datetime.now()
     end_time = start_time + timedelta(seconds=30)
@@ -254,7 +258,7 @@ def test_tasks_import_optional():
     """Test that tasks import is optional."""
     # Tasks should be importable if celery is available
     try:
-        from universal_notion_sync import sync_notion_data
+        from yeonjae_universal_notion_sync import sync_notion_data
         # If import succeeds, check it's callable or None
         assert sync_notion_data is None or callable(sync_notion_data)
     except ImportError:

@@ -9,7 +9,7 @@ import pytest
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_prompt_builder.models import (
+    from yeonjae_universal_prompt_builder.models import (
         PromptType, PromptTemplate, PromptVariable,
         PromptRequest, PromptResponse, BuiltPrompt
     )
@@ -22,7 +22,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_prompt_builder.exceptions import (
+    from yeonjae_universal_prompt_builder.exceptions import (
         PromptBuilderException,
         TemplateNotFoundException,
         VariableValidationException
@@ -35,7 +35,7 @@ def test_exceptions_import():
 
 def test_prompt_variable_creation():
     """PromptVariable 생성 테스트"""
-    from universal_prompt_builder.models import PromptVariable
+    from yeonjae_universal_prompt_builder.models import PromptVariable
     
     variable = PromptVariable(
         name="commit_message",
@@ -50,7 +50,7 @@ def test_prompt_variable_creation():
 
 def test_prompt_template_creation():
     """PromptTemplate 생성 테스트"""
-    from universal_prompt_builder.models import PromptTemplate, PromptType
+    from yeonjae_universal_prompt_builder.models import PromptTemplate, PromptType
     
     template = PromptTemplate(
         name="commit_summary_template",
@@ -65,7 +65,7 @@ def test_prompt_template_creation():
 
 def test_prompt_request_creation():
     """PromptRequest 생성 테스트"""
-    from universal_prompt_builder.models import PromptRequest, PromptType
+    from yeonjae_universal_prompt_builder.models import PromptRequest, PromptType
     
     request = PromptRequest(
         template_id="commit_summary_template",  # template_name -> template_id로 변경
@@ -80,7 +80,7 @@ def test_prompt_request_creation():
 
 def test_built_prompt_creation():
     """BuiltPrompt 생성 테스트"""
-    from universal_prompt_builder.models import BuiltPrompt, PromptType
+    from yeonjae_universal_prompt_builder.models import BuiltPrompt, PromptType
     
     built = BuiltPrompt(
         prompt_type=PromptType.COMMIT_SUMMARY,
@@ -97,7 +97,7 @@ def test_built_prompt_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_prompt_builder.exceptions import TemplateNotFoundException
+    from yeonjae_universal_prompt_builder.exceptions import TemplateNotFoundException
     
     exception = TemplateNotFoundException("missing_template")
     

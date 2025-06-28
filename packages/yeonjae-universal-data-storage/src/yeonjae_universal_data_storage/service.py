@@ -15,12 +15,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.future import select
 
-from universal_data_storage.models import (
+from yeonjae_universal_data_storage.models import (
     Event, CommitRecord, DiffRecord, 
     CommitData, DiffData, StorageResult, StorageStatus,
     CommitSummary, DiffSummary, CommitWithDiffs, BatchStorageResult
 )
-from universal_git_data_parser.models import DiffData as GitDiffData
+from yeonjae_universal_git_data_parser.models import DiffData as GitDiffData
 # Database configuration - standalone implementation
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base

@@ -8,7 +8,7 @@ import pytest
 from datetime import datetime
 from typing import Dict, List
 
-from universal_data_storage.models import (
+from yeonjae_universal_data_storage.models import (
     StorageStatus, CommitData, DiffData, StorageResult,
     CommitSummary, DiffSummary, CommitWithDiffs, BatchStorageResult,
     EventCreate, EventResponse

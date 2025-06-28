@@ -10,11 +10,11 @@ from types import MappingProxyType
 
 from celery import shared_task
 
-from universal_git_data_parser.service import GitDataParserService
-from universal_git_data_parser.models import DiffData, ParsedWebhookData
-from universal_http_api_client import HTTPAPIClient, Platform
-from universal_diff_analyzer.service import DiffAnalyzer
-from universal_data_storage.service import LegacyDataStorageService
+from yeonjae_universal_git_data_parser.service import GitDataParserService
+from yeonjae_universal_git_data_parser.models import DiffData, ParsedWebhookData
+from yeonjae_universal_http_api_client import HTTPAPIClient, Platform
+from yeonjae_universal_diff_analyzer.service import DiffAnalyzer
+from yeonjae_universal_data_storage.service import LegacyDataStorageService
 # Simplified settings and logging for standalone operation
 def get_settings():
     class Settings:

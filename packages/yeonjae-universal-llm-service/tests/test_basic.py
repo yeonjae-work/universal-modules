@@ -4,7 +4,7 @@ Universal LLM Service 기본 테스트
 
 import pytest
 import asyncio
-from universal_llm_service import (
+from yeonjae_universal_llm_service import (
     LLMService,
     LLMInput,
     LLMProvider,
@@ -20,7 +20,7 @@ def test_version():
 
 def test_import():
     """패키지 import 테스트"""
-    from universal_llm_service import (
+    from yeonjae_universal_llm_service import (
         LLMService, LLMInput, LLMResult, LLMProvider, 
         ModelConfig, LLMResponseMetadata
     )

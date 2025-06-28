@@ -44,7 +44,7 @@ Issues = "https://github.com/yeonjae/universal-modules/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-universal_diff_analyzer = ["py.typed"]
+yeonjae_universal_diff_analyzer = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -54,7 +54,7 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["src/universal_diff_analyzer"]
+source = ["src/yeonjae_universal_diff_analyzer"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

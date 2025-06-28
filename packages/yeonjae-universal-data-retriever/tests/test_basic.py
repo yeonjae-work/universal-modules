@@ -10,8 +10,8 @@ import pytest
 def test_module_import():
     """모듈 임포트 테스트"""
     try:
-        import universal_data_retriever
-        assert hasattr(universal_data_retriever, '__version__')
+        import yeonjae_universal_data_retriever
+        assert hasattr(yeonjae_universal_data_retriever, '__version__')
     except ImportError:
         # __init__.py가 없거나 버전이 정의되지 않은 경우
         pass
@@ -19,7 +19,7 @@ def test_module_import():
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_data_retriever.models import (
+    from yeonjae_universal_data_retriever.models import (
         FilterOperator, SortDirection, FilterCondition,
         QueryParams, CommitInfo, DiffInfo
     )
@@ -33,7 +33,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_data_retriever.exceptions import (
+    from yeonjae_universal_data_retriever.exceptions import (
         DataRetrieverException,
         InvalidQueryException,
         DataNotFoundException
@@ -46,7 +46,7 @@ def test_exceptions_import():
 
 def test_filter_condition_creation():
     """FilterCondition 생성 테스트"""
-    from universal_data_retriever.models import FilterCondition, FilterOperator
+    from yeonjae_universal_data_retriever.models import FilterCondition, FilterOperator
     
     condition = FilterCondition(
         field="test_field",
@@ -61,7 +61,7 @@ def test_filter_condition_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_data_retriever.exceptions import InvalidQueryException
+    from yeonjae_universal_data_retriever.exceptions import InvalidQueryException
     
     exception = InvalidQueryException("test_field", "test_reason")
     
@@ -74,7 +74,7 @@ def test_exception_creation():
 def test_commit_info_creation():
     """CommitInfo 생성 테스트"""
     from datetime import datetime
-    from universal_data_retriever.models import CommitInfo
+    from yeonjae_universal_data_retriever.models import CommitInfo
     
     commit = CommitInfo(
         commit_id="123",
@@ -97,7 +97,7 @@ def test_commit_info_creation():
 
 def test_pagination_config():
     """PaginationConfig 테스트"""
-    from universal_data_retriever.models import PaginationConfig
+    from yeonjae_universal_data_retriever.models import PaginationConfig
     
     # 기본값 테스트
     pagination = PaginationConfig()
@@ -112,7 +112,7 @@ def test_pagination_config():
 
 def test_query_metadata_creation():
     """QueryMetadata 생성 테스트"""
-    from universal_data_retriever.models import QueryMetadata
+    from yeonjae_universal_data_retriever.models import QueryMetadata
     
     metadata = QueryMetadata(
         query_time_seconds=0.5,

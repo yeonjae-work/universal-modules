@@ -45,7 +45,7 @@ Issues = "https://github.com/yeonjae/universal-modules/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-universal_prompt_builder = ["py.typed"]
+yeonjae_universal_prompt_builder = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -55,7 +55,7 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["src/universal_prompt_builder"]
+source = ["src/yeonjae_universal_prompt_builder"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

@@ -358,8 +358,9 @@ class HTTPAPIClient:
         # 입력 로깅
         self.io_logger.log_input(
             "get_commit",
-            data={"repo_name": repo_name, "commit_sha": commit_sha},
-            metadata={"platform": self.platform.value}
+            repo_name=repo_name,
+            commit_sha=commit_sha,
+            platform=self.platform.value
         )
         
         try:
@@ -376,14 +377,8 @@ class HTTPAPIClient:
             # 출력 로깅
             self.io_logger.log_output(
                 "get_commit",
-                data=response.data,
-                metadata={
-                    "platform": self.platform.value,
-                    "status_code": response.status_code,
-                    "success": response.success,
-                    "commit_sha": commit_sha,
-                    "files_changed": len(response.data.get("files", [])) if response.data else 0
-                }
+                result=response.data,
+                execution_time=response.response_time
             )
             
             return response
@@ -392,12 +387,7 @@ class HTTPAPIClient:
             # 오류 로깅
             self.io_logger.log_error(
                 "get_commit",
-                e,
-                metadata={
-                    "platform": self.platform.value,
-                    "repo_name": repo_name,
-                    "commit_sha": commit_sha
-                }
+                e
             )
             raise
     

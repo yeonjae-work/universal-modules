@@ -45,7 +45,7 @@ Issues = "https://github.com/yeonjae/universal-modules/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-universal_data_storage = ["py.typed"]
+yeonjae_universal_data_storage = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -55,7 +55,7 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["src/universal_data_storage"]
+source = ["src/yeonjae_universal_data_storage"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

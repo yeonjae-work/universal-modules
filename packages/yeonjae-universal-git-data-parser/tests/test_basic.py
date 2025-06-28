@@ -4,7 +4,7 @@ Universal Git Data Parser 기본 테스트
 
 import pytest
 from datetime import datetime
-from universal_git_data_parser import (
+from yeonjae_universal_git_data_parser import (
     GitDataParserService,
     ValidatedEvent,
     CommitInfo,
@@ -21,7 +21,7 @@ def test_version():
 
 def test_import():
     """패키지 import 테스트"""
-    from universal_git_data_parser import (
+    from yeonjae_universal_git_data_parser import (
         GitDataParserService, ValidatedEvent, CommitInfo,
         Author, DiffData, GitHubPushPayload
     )
@@ -158,7 +158,7 @@ def test_github_push_parsing():
 
 def test_exception_classes():
     """예외 클래스 테스트"""
-    from universal_git_data_parser import (
+    from yeonjae_universal_git_data_parser import (
         GitDataParserError,
         InvalidPayloadError,
         UnsupportedPlatformError
@@ -182,7 +182,7 @@ def test_service_methods():
 
 def test_diff_data_model():
     """DiffData 모델 테스트"""
-    from universal_git_data_parser import DiffData
+    from yeonjae_universal_git_data_parser import DiffData
     
     # DiffData가 올바르게 import되는지 확인
     assert DiffData is not None
@@ -190,7 +190,7 @@ def test_diff_data_model():
 
 def test_file_change_model():
     """FileChange 모델 테스트"""
-    from universal_git_data_parser import FileChange
+    from yeonjae_universal_git_data_parser import FileChange
     
     # FileChange가 올바르게 import되는지 확인
     assert FileChange is not None
@@ -198,7 +198,7 @@ def test_file_change_model():
 
 def test_comprehensive_models():
     """포괄적인 모델 테스트"""
-    from universal_git_data_parser import (
+    from yeonjae_universal_git_data_parser import (
         GitHubPushPayload, DiffStats, ParsedWebhookData
     )
     
@@ -210,7 +210,7 @@ def test_comprehensive_models():
 
 def test_error_handling():
     """에러 처리 테스트"""
-    from universal_git_data_parser import (
+    from yeonjae_universal_git_data_parser import (
         DiffParsingError, CommitNotFoundError, TimestampParsingError
     )
     
@@ -222,7 +222,7 @@ def test_error_handling():
 
 def test_network_errors():
     """네트워크 관련 에러 테스트"""
-    from universal_git_data_parser import (
+    from yeonjae_universal_git_data_parser import (
         NetworkTimeoutError, RateLimitExceededError
     )
     

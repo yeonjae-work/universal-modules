@@ -9,7 +9,7 @@ import requests_mock
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
-from universal_http_api_client import (
+from yeonjae_universal_http_api_client import (
     HTTPAPIClient, Platform, HTTPMethod, APIResponse, 
     APIError, RateLimitError, AuthenticationError
 )
@@ -222,7 +222,7 @@ class TestHTTPAPIClient:
     def test_timeout_handling(self, github_client):
         """타임아웃 처리 테스트"""
         with requests_mock.Mocker() as m:
-            from universal_http_api_client.exceptions import TimeoutError as APITimeoutError
+            from yeonjae_universal_http_api_client.exceptions import TimeoutError as APITimeoutError
             
             # requests.exceptions.Timeout을 발생시키도록 설정
             m.get(
@@ -236,7 +236,7 @@ class TestHTTPAPIClient:
     def test_network_error_handling(self, github_client):
         """네트워크 에러 처리 테스트"""
         with requests_mock.Mocker() as m:
-            from universal_http_api_client.exceptions import NetworkError
+            from yeonjae_universal_http_api_client.exceptions import NetworkError
             
             m.get(
                 "https://api.github.com/repos/test/repo/commits/abc123",

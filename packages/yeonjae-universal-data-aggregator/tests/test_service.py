@@ -4,7 +4,7 @@ Universal Data Aggregator Service 테스트
 
 import pytest
 from datetime import datetime
-from universal_data_aggregator import (
+from yeonjae_universal_data_aggregator import (
     DataAggregatorService, AggregationInput, DateRange,
     CommitData, DiffInfo, DiffType
 )

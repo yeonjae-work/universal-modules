@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field, ConfigDict
 
 # Git data parser models import
-from universal_git_data_parser.models import ParsedWebhookData, FileChange
+from yeonjae_universal_git_data_parser.models import ParsedWebhookData, FileChange
 
 
 class ImpactLevel(Enum):

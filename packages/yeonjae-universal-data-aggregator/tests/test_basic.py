@@ -10,7 +10,7 @@ from datetime import datetime
 
 def test_models_import():
     """모델 임포트 테스트"""
-    from universal_data_aggregator.models import (
+    from yeonjae_universal_data_aggregator.models import (
         AggregationType, DateRange, AggregationRequest, 
         DeveloperSummary, AggregationResult
     )
@@ -23,7 +23,7 @@ def test_models_import():
 
 def test_exceptions_import():
     """예외 클래스 임포트 테스트"""
-    from universal_data_aggregator.exceptions import (
+    from yeonjae_universal_data_aggregator.exceptions import (
         DataAggregatorException,
         InvalidDateRangeException,
         AggregationException
@@ -36,7 +36,7 @@ def test_exceptions_import():
 
 def test_date_range_creation():
     """DateRange 생성 테스트"""
-    from universal_data_aggregator.models import DateRange
+    from yeonjae_universal_data_aggregator.models import DateRange
     
     date_range = DateRange(
         start="2024-01-01",
@@ -49,7 +49,7 @@ def test_date_range_creation():
 
 def test_aggregation_request_creation():
     """AggregationRequest 생성 테스트"""
-    from universal_data_aggregator.models import AggregationRequest, AggregationType, DateRange
+    from yeonjae_universal_data_aggregator.models import AggregationRequest, AggregationType, DateRange
     
     request = AggregationRequest(
         aggregation_type=AggregationType.DAILY,
@@ -65,7 +65,7 @@ def test_aggregation_request_creation():
 
 def test_developer_summary_creation():
     """DeveloperSummary 생성 테스트"""
-    from universal_data_aggregator.models import DeveloperSummary
+    from yeonjae_universal_data_aggregator.models import DeveloperSummary
     
     summary = DeveloperSummary(
         developer_email="test@example.com",
@@ -86,7 +86,7 @@ def test_developer_summary_creation():
 
 def test_exception_creation():
     """예외 생성 테스트"""
-    from universal_data_aggregator.exceptions import InvalidDateRangeException
+    from yeonjae_universal_data_aggregator.exceptions import InvalidDateRangeException
     
     exception = InvalidDateRangeException("2024-01-31", "2024-01-01")
     

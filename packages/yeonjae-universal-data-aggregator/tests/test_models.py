@@ -4,7 +4,7 @@ Universal Data Aggregator Models 테스트
 
 import pytest
 from datetime import datetime
-from universal_data_aggregator.models import (
+from yeonjae_universal_data_aggregator.models import (
     DateRange, DiffInfo, DiffType, CommitData, AggregationInput,
     DeveloperStats, RepositoryStats, TimeAnalysis, ComplexityMetrics,
     AggregationResult, CacheKey

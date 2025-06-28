@@ -3,14 +3,14 @@ Tests for universal_prompt_builder.service
 """
 
 import pytest
-from universal_prompt_builder.service import PromptBuilderService
-from universal_prompt_builder.models import (
+from yeonjae_universal_prompt_builder.service import PromptBuilderService
+from yeonjae_universal_prompt_builder.models import (
     PromptInput,
     PromptType,
     CustomizationOptions,
     PromptResult
 )
-from universal_prompt_builder.exceptions import (
+from yeonjae_universal_prompt_builder.exceptions import (
     PromptBuilderException,
     TemplateNotFoundException
 )

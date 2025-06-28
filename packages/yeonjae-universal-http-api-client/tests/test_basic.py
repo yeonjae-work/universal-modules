@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, 'src')
 
 import pytest
-from universal_http_api_client import HTTPAPIClient, Platform, __version__
+from yeonjae_universal_http_api_client import HTTPAPIClient, Platform, __version__
 
 
 def test_version():
@@ -15,7 +15,7 @@ def test_version():
 
 def test_import():
     """기본 import 테스트"""
-    from universal_http_api_client import (
+    from yeonjae_universal_http_api_client import (
         HTTPAPIClient,
         AsyncHTTPAPIClient,
         Platform,
