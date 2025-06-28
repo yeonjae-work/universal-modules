@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-git-data-parser"
-version = "1.0.2"
+version = "1.0.3"
 description = "Universal Git webhook data parser supporting GitHub, GitLab, and other SCM platforms"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "MIT"}

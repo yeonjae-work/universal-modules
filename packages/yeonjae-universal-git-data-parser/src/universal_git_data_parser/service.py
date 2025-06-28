@@ -63,19 +63,20 @@ class GitDataParserService:
 
             # Ref 정보 (브랜치)
             ref = payload.get("ref", "")
+            
+            # Pusher 정보 추출
+            pusher_info = payload.get("pusher", {})
+            pusher = pusher_info.get("name", pusher_info.get("login", "unknown"))
 
-            # Commits 파싱
+            # Commits 파싱 - GitCommit 모델 사용 (ValidatedEvent와 호환)
             commits_data = payload.get("commits", [])
             commits = []
             
             for commit_data in commits_data:
                 try:
-                    # Author 정보 파싱
+                    # Author 정보 파싱 (GitCommit은 author를 문자열로 저장)
                     author_data = commit_data.get("author", {})
-                    author = Author(
-                        name=author_data.get("name", "Unknown"),
-                        email=author_data.get("email", "unknown@example.com")
-                    )
+                    author_name = author_data.get("name", "Unknown")
                     
                     # Timestamp 파싱
                     timestamp_str = commit_data.get("timestamp")
@@ -88,17 +89,18 @@ class GitDataParserService:
                     else:
                         timestamp = datetime.utcnow()
                     
-                    # CommitInfo 생성
-                    commit_info = CommitInfo(
+                    # GitCommit 생성 (ValidatedEvent와 호환)
+                    git_commit = GitCommit(
                         id=commit_data.get("id", ""),
                         message=commit_data.get("message", ""),
-                        author=author,
+                        url=commit_data.get("url", ""),
+                        author=author_name,
                         timestamp=timestamp,
                         added=commit_data.get("added", []),
                         modified=commit_data.get("modified", []),
                         removed=commit_data.get("removed", [])
                     )
-                    commits.append(commit_info)
+                    commits.append(git_commit)
                     
                 except Exception as e:
                     logger.warning("Failed to parse commit: %s", str(e))
@@ -108,6 +110,7 @@ class GitDataParserService:
             validated_event = ValidatedEvent(
                 repository=repository,
                 ref=ref,
+                pusher=pusher,
                 commits=commits
             )
             
