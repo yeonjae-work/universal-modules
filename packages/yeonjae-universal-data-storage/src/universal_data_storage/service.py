@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.future import select
 
-from modules.data_storage.models import (
+from universal_data_storage.models import (
     Event, CommitRecord, DiffRecord, 
     CommitData, DiffData, StorageResult, StorageStatus,
     CommitSummary, DiffSummary, CommitWithDiffs, BatchStorageResult

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-webhook-receiver"
-version = "1.0.2"
+version = "1.0.3"
 description = "Universal webhook receiver module for handling webhooks from various sources"
 authors = [{name = "Yeonjae", email = "dev@example.com"}]
 license = {text = "MIT"}
@@ -68,7 +68,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "1.0.3"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

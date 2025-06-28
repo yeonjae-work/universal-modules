@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-http-api-client"
-version = "1.0.1"
+version = "1.0.3"
 description = "Universal HTTP API client supporting GitHub, GitLab, Bitbucket and other platforms"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "MIT"}
@@ -67,7 +67,7 @@ profile = "black"
 line_length = 88
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "1.0.3"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

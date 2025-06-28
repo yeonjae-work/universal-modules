@@ -8,10 +8,10 @@ from typing import Dict, Any
 
 from celery import shared_task
 
-from modules.data_retriever.service import DataRetrieverService
+from universal_data_retriever.service import DataRetrieverService
 from universal_llm_service import LLMService, LLMInput, LLMProvider, ModelConfig
-from modules.data_aggregator.service import DataAggregatorService
-from modules.prompt_builder.service import PromptBuilderService
+from universal_data_aggregator.service import DataAggregatorService
+from universal_prompt_builder.service import PromptBuilderService
 from universal_notification_service import NotificationService
 # Simplified logging for standalone operation
 def log_module_io(module_name: str, operation: str, data: dict):
@@ -81,7 +81,7 @@ def daily_summary_task() -> Dict[str, Any]:
         logger.info("🔢 DataAggregator: Starting data aggregation")
         
         # 데이터를 AggregationInput 형태로 변환
-        from modules.data_aggregator.models import AggregationInput, CommitData, DiffInfo, DateRange
+        from universal_data_aggregator.models import AggregationInput, CommitData, DiffInfo, DateRange
         
         commits = []
         for commit_info in retrieved_data.commits:

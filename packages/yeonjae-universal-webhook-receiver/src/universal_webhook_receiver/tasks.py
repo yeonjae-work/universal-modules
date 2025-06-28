@@ -13,8 +13,8 @@ from celery import shared_task
 from universal_git_data_parser.service import GitDataParserService
 from universal_git_data_parser.models import DiffData, ParsedWebhookData
 from universal_http_api_client import HTTPAPIClient, Platform
-from modules.diff_analyzer.service import DiffAnalyzer
-from modules.data_storage.service import LegacyDataStorageService
+from universal_diff_analyzer.service import DiffAnalyzer
+from universal_data_storage.service import LegacyDataStorageService
 # Simplified settings and logging for standalone operation
 def get_settings():
     class Settings:
