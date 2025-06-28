@@ -160,7 +160,172 @@ jobs:
     if: always()
     
     steps:
-      - name: 배포 완료 알림
+      - name: 배포 성공 알림
+        if: needs.deploy.result == 'success'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "🚀 Universal Modules 배포 성공!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "🚀 배포 완료"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*배포된 모듈:*\n전체 5개 모듈"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*브랜치:*\n${{ github.ref_name }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*커밋:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*작성자:*\n${{ github.actor }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "GitHub Actions 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      },
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "PyPI 확인"
+                        },
+                        "url": "https://pypi.org/search/?q=universal"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 배포 실패 알림
+        if: needs.deploy.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "❌ Universal Modules 배포 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "❌ 배포 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*실패한 모듈:*\n전체 5개 모듈"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*브랜치:*\n${{ github.ref_name }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*커밋:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*작성자:*\n${{ github.actor }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "로그 확인하기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 테스트 실패 알림
+        if: needs.deploy.result == 'skipped' && contains(needs.*.result, 'failure')
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "⚠️ Universal Modules 테스트 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "⚠️ 테스트 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* 전체 5개 모듈\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "테스트 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 일반 완료 알림
+        if: needs.deploy.result != 'success' && needs.deploy.result != 'failure'
         run: |
           echo "🚀 Universal Modules 배포 프로세스 완료!"
           echo "상태: ${{ needs.deploy.result }}" 
