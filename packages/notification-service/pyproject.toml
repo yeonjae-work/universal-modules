@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "universal-notification-service"
-version = "1.0.0"
+name = "yeonjae-universal-notification-service"
+version = "1.0.1"
 description = "Universal notification service supporting Slack, Email, Discord, and webhooks for automated reporting"
 readme = "README.md"
 license = {text = "MIT"}

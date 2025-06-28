@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "universal-http-api-client"
-version = "1.0.0"
-description = "Universal HTTP API client with platform-specific adapters for GitHub, GitLab, Slack, and Notion"
+name = "yeonjae-universal-http-api-client"
+version = "1.0.1"
+description = "Universal HTTP API client supporting GitHub, GitLab, Bitbucket and other platforms"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [

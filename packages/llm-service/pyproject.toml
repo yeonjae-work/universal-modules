@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "universal-llm-service"
-version = "1.0.0"
+name = "yeonjae-universal-llm-service"
+version = "1.0.1"
 description = "Universal LLM service supporting OpenAI, Anthropic, and local models for code analysis and summarization"
 readme = "README.md"
 license = {text = "MIT"}

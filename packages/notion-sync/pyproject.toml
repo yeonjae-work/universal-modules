@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "universal-notion-sync"
-version = "1.0.0"
-description = "Universal Notion synchronization engine for seamless data integration"
+name = "yeonjae-universal-notion-sync"
+version = "1.0.1"
+description = "Universal Notion synchronization service for development data and documentation"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
