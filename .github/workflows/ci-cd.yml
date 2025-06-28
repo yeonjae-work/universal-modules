@@ -419,9 +419,15 @@ jobs:
         run: |
           cd packages/${{ matrix.module }}
           
-          # pyproject.toml에서 실제 패키지명 추출
-          package_name=$(python3 -c "import toml; print(toml.load('pyproject.toml')['project']['name'])")
+          # pyproject.toml에서 실제 패키지명 추출 (toml 모듈 없이)
+          package_name=$(grep -E '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/' | tr -d '"')
           echo "📦 실제 패키지명: $package_name"
+          
+          # 패키지명이 비어있으면 기본값 사용
+          if [ -z "$package_name" ]; then
+            package_name="yeonjae-${{ matrix.module }}"
+            echo "⚠️ 패키지명 추출 실패, 기본값 사용: $package_name"
+          fi
           
           if [ -n "${{ secrets.PYPI_API_TOKEN }}" ]; then
             echo "🚀 PyPI 배포 시작: $package_name v${{ steps.version-check.outputs.new-version }}"
