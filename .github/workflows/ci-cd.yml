@@ -18,42 +18,99 @@ env:
   ACTIONS_STEP_DEBUG: false
 
 jobs:
-  # 변경된 모듈 감지 (단순화)
+  # 변경된 모듈 감지
   detect-changes:
-    name: "모듈 처리 준비"
+    name: "변경된 모듈 감지"
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.setup.outputs.matrix }}
-      has-changes: "true"
+      changed-modules: ${{ steps.changes.outputs.modules }}
+      matrix: ${{ steps.changes.outputs.matrix }}
+      has-changes: ${{ steps.changes.outputs.has-changes }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 모듈 매트릭스 설정
-        id: setup
+      - name: 변경된 모듈 감지
+        id: changes
         run: |
-          # 모든 모듈을 항상 처리
-          echo "📦 모든 모듈 처리: git-data-parser http-api-client llm-service notification-service notion-sync"
+          # 모든 모듈 목록을 packages 디렉터리에서 동적으로 가져오기
+          all_modules=$(ls -1 packages/ | tr '\n' ' ' | sed 's/ $//')
+          echo "🔍 전체 모듈: $all_modules"
           
-          # Matrix 전략을 위한 JSON 생성
-          matrix_json='{"include":[
-            {"module":"git-data-parser"},
-            {"module":"http-api-client"},
-            {"module":"llm-service"},
-            {"module":"notification-service"},
-            {"module":"notion-sync"}
-          ]}'
+          # 변경된 파일 확인
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR의 경우 base 브랜치와 비교
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+            changed_files=$(git diff --name-only $base_sha..$head_sha)
+          else
+            # Push의 경우 이전 커밋과 비교
+            if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+              changed_files=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }})
+            else
+              # 첫 번째 커밋인 경우 모든 파일
+              changed_files=$(git ls-files)
+            fi
+          fi
           
-          echo "matrix=$matrix_json" >> $GITHUB_OUTPUT
-          echo "✅ 매트릭스 설정 완료"
+          echo "📄 변경된 파일들:"
+          echo "$changed_files"
+          
+          # 변경된 모듈 추출
+          changed_modules=""
+          for module in $all_modules; do
+            if echo "$changed_files" | grep -q "packages/$module/"; then
+              if [ -z "$changed_modules" ]; then
+                changed_modules="$module"
+              else
+                changed_modules="$changed_modules $module"
+              fi
+              echo "📦 변경 감지: $module"
+            fi
+          done
+          
+          # CI/CD 관련 파일이 변경된 경우 모든 모듈 처리
+          if echo "$changed_files" | grep -E "(\.github/workflows|scripts/|Makefile|pyproject\.toml)"; then
+            echo "🔧 CI/CD 파일 변경 감지 - 모든 모듈 처리"
+            changed_modules="$all_modules"
+          fi
+          
+          # 변경된 모듈이 없는 경우 처리
+          if [ -z "$changed_modules" ]; then
+            echo "📄 변경된 모듈 없음"
+            echo "modules=" >> $GITHUB_OUTPUT
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "📦 변경된 모듈: $changed_modules"
+            echo "modules=$changed_modules" >> $GITHUB_OUTPUT
+            
+            # Matrix 전략을 위한 JSON 생성 (한 줄로)
+            matrix_json='{"include":['
+            first=true
+            for module in $changed_modules; do
+              if [ "$first" = true ]; then
+                first=false
+              else
+                matrix_json="$matrix_json,"
+              fi
+              matrix_json="$matrix_json{\"module\":\"$module\"}"
+            done
+            matrix_json="$matrix_json]}"
+            
+            echo "matrix=$matrix_json" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "✅ 매트릭스 JSON: $matrix_json"
+          fi
 
   # 코드 품질 검사
   quality-check:
     name: "코드 품질 검사"
     runs-on: ubuntu-latest
     needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
     
@@ -95,15 +152,11 @@ jobs:
     name: "테스트 실행"
     runs-on: ubuntu-latest
     needs: [detect-changes, quality-check]
+    if: needs.detect-changes.outputs.has-changes == 'true'
     strategy:
       matrix: 
         python-version: ["3.11"]
-        include:
-          - { module: "git-data-parser" }
-          - { module: "http-api-client" }
-          - { module: "llm-service" }
-          - { module: "notification-service" }
-          - { module: "notion-sync" }
+        module: ${{ fromJson(needs.detect-changes.outputs.matrix).include[*].module }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -130,6 +183,7 @@ jobs:
     name: "패키지 빌드"
     runs-on: ubuntu-latest
     needs: [detect-changes, test]
+    if: needs.detect-changes.outputs.has-changes == 'true'
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
     
@@ -162,6 +216,7 @@ jobs:
     name: "문서 업데이트"
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.has-changes == 'true'
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
     
@@ -226,7 +281,7 @@ jobs:
     name: "문서 통합 및 푸시"
     runs-on: ubuntu-latest
     needs: [detect-changes, documentation]
-    if: github.ref == 'refs/heads/main'
+    if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
     
     steps:
       - name: Checkout code
@@ -252,8 +307,7 @@ jobs:
       
       - name: 문서 아티팩트 복원
         run: |
-          modules=(git-data-parser http-api-client llm-service notification-service notion-sync)
-          for module in "${modules[@]}"; do
+          for module in ${{ needs.detect-changes.outputs.changed-modules }}; do
             if [ -d "./docs-artifacts/docs-$module" ]; then
               echo "📄 $module 문서 복원 중..."
               cp -r "./docs-artifacts/docs-$module/"* "packages/$module/docs/" || true
@@ -265,10 +319,10 @@ jobs:
           if ! git diff --quiet packages/*/docs/; then
             echo "📚 통합 문서 업데이트 감지"
             git add packages/*/docs/
-            git commit -m "docs: 모듈 기술명세서 자동 업데이트
+            git commit -m "docs: 변경된 모듈 기술명세서 자동 업데이트
             
             🤖 자동 생성된 문서 업데이트:
-            - 처리된 모듈: git-data-parser http-api-client llm-service notification-service notion-sync
+            - 변경된 모듈: ${{ needs.detect-changes.outputs.changed-modules }}
             - API 구조 분석 및 동기화
             - 코드 변경사항 반영
             - 성능 메트릭 및 사용법 업데이트
@@ -286,7 +340,7 @@ jobs:
     name: "PyPI 배포"
     runs-on: ubuntu-latest
     needs: [detect-changes, build, docs-consolidate]
-    if: github.ref == 'refs/heads/main'
+    if: needs.detect-changes.outputs.has-changes == 'true' && github.ref == 'refs/heads/main'
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
     
