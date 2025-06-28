@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-data-aggregator"
-version = "1.0.1"
+version = "1.0.2"
 description = "Universal data aggregator module for processing and aggregating development data"
 authors = [{name = "Yeonjae", email = "dev@example.com"}]
 license = {text = "MIT"}

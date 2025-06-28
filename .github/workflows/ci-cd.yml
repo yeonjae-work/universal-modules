@@ -418,20 +418,40 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           cd packages/${{ matrix.module }}
+          
+          # pyproject.toml에서 실제 패키지명 추출
+          package_name=$(python3 -c "import toml; print(toml.load('pyproject.toml')['project']['name'])")
+          echo "📦 실제 패키지명: $package_name"
+          
           if [ -n "${{ secrets.PYPI_API_TOKEN }}" ]; then
-            echo "🚀 PyPI 배포 시작: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
+            echo "🚀 PyPI 배포 시작: $package_name v${{ steps.version-check.outputs.new-version }}"
+            
             # 실제 배포 전 검증
-            twine check dist/*
-            echo "📦 패키지 검증 완료"
+            echo "📋 패키지 검증 중..."
+            if ! twine check dist/*; then
+              echo "❌ 패키지 검증 실패!"
+              exit 1
+            fi
+            echo "✅ 패키지 검증 완료"
+            
+            # 기존 버전 확인 (선택사항)
+            echo "🔍 기존 버전 확인 중..."
+            existing_version=$(pip index versions $package_name 2>/dev/null | grep "Available versions:" | head -1 || echo "신규 패키지")
+            echo "기존 버전: $existing_version"
             
             # 실제 배포
-            twine upload dist/* --verbose
-            echo "✅ PyPI 배포 완료: https://pypi.org/project/universal-${{ matrix.module }}/"
+            echo "🚀 PyPI 업로드 시작..."
+            if twine upload dist/* --verbose --skip-existing; then
+              echo "✅ PyPI 배포 완료: https://pypi.org/project/$package_name/"
+            else
+              echo "❌ PyPI 배포 실패!"
+              exit 1
+            fi
           else
             echo "⚠️ PYPI_API_TOKEN이 설정되지 않아 배포를 건너뜁니다."
             echo "📦 패키지 검증만 수행합니다:"
             twine check dist/*
-            echo "배포 시뮬레이션: ${{ matrix.module }} v${{ steps.version-check.outputs.new-version }}"
+            echo "배포 시뮬레이션: $package_name v${{ steps.version-check.outputs.new-version }}"
           fi
       
       - name: GitHub Release 생성
@@ -449,12 +469,13 @@ jobs:
             
             ### 📦 설치 방법
             ```bash
-            pip install universal-${{ matrix.module }}==${{ steps.version-check.outputs.new-version }}
+            # 실제 패키지명으로 설치 (yeonjae- 접두사 포함)
+            pip install yeonjae-${{ matrix.module }}==${{ steps.version-check.outputs.new-version }}
             ```
             
             ### 📚 문서
             - [기술명세서](https://github.com/${{ github.repository }}/blob/main/packages/${{ matrix.module }}/docs/technical-specification.md)
-            - [PyPI 페이지](https://pypi.org/project/universal-${{ matrix.module }}/)
+            - [PyPI 페이지](https://pypi.org/project/yeonjae-${{ matrix.module }}/)
             
             ### 🔗 링크
             - [GitHub Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})

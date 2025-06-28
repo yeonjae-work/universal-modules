@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yeonjae-universal-webhook-receiver"
-version = "1.0.1"
+version = "1.0.2"
 description = "Universal webhook receiver module for handling webhooks from various sources"
 authors = [{name = "Yeonjae", email = "dev@example.com"}]
 license = {text = "MIT"}
