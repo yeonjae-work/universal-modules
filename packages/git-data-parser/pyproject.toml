@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "universal-git-data-parser"
-version = "1.0.0"
+name = "yeonjae-universal-git-data-parser"
+version = "1.0.2"
 description = "Universal Git webhook data parser supporting GitHub, GitLab, and other SCM platforms"
 readme = "README.md"
 license = {text = "MIT"}
