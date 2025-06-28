@@ -9,7 +9,7 @@ import requests_mock
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
-from modules.http_api_client import (
+from universal_http_api_client import (
     HTTPAPIClient, Platform, HTTPMethod, APIResponse, 
     APIError, RateLimitError, AuthenticationError
 )

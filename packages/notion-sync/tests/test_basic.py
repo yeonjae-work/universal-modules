@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 import universal_notion_sync
@@ -78,42 +78,39 @@ def test_notion_credentials_model():
 
 def test_sync_configuration_model():
     """Test SyncConfiguration model creation."""
-    from universal_notion_sync import SyncConfiguration, SyncStrategy, ContentFormat, RelationDiscoveryMode
+    from universal_notion_sync import SyncConfiguration, NotionCredentials, RelationDiscoveryMode
     
+    credentials = NotionCredentials(token="test_token")
     config = SyncConfiguration(
-        strategy=SyncStrategy.FULL_SYNC,
-        content_format=ContentFormat.JSON,
-        relation_discovery_mode=RelationDiscoveryMode.SHALLOW,
-        batch_size=50,
-        enable_relation_discovery=True
+        credentials=credentials,
+        relation_discovery=RelationDiscoveryMode.SHALLOW,
+        batch_size=50
     )
     
-    assert config.strategy == SyncStrategy.FULL_SYNC
-    assert config.content_format == ContentFormat.JSON
-    assert config.relation_discovery_mode == RelationDiscoveryMode.SHALLOW
+    assert config.credentials.token == "test_token"
+    assert config.relation_discovery == RelationDiscoveryMode.SHALLOW
     assert config.batch_size == 50
-    assert config.enable_relation_discovery is True
 
 
 def test_sync_target_model():
     """Test SyncTarget model creation."""
-    from universal_notion_sync import SyncTarget, SyncConfiguration, SyncStrategy
-    
-    sync_config = SyncConfiguration(
-        strategy=SyncStrategy.INCREMENTAL,
-        batch_size=25
-    )
+    from universal_notion_sync import SyncTarget, SyncStrategy, ContentFormat
     
     target = SyncTarget(
-        database_id="db_123456",
-        configuration=sync_config,
-        name="test_target"
+        id="db_123456",
+        type="database",
+        name="test_target",
+        output_path="./output.md",
+        format=ContentFormat.MARKDOWN,
+        strategy=SyncStrategy.INCREMENTAL
     )
     
-    assert target.database_id == "db_123456"
-    assert target.configuration.strategy == SyncStrategy.INCREMENTAL
-    assert target.configuration.batch_size == 25
+    assert target.id == "db_123456"
+    assert target.type == "database"
     assert target.name == "test_target"
+    assert target.output_path == "./output.md"
+    assert target.format == ContentFormat.MARKDOWN
+    assert target.strategy == SyncStrategy.INCREMENTAL
 
 
 def test_notion_api_client_creation():
@@ -126,8 +123,8 @@ def test_notion_api_client_creation():
     assert client.credentials.token == "test_token"
     assert hasattr(client, 'get_database')
     assert hasattr(client, 'query_database')
-    assert hasattr(client, 'create_page')
-    assert hasattr(client, 'update_page')
+    assert hasattr(client, 'get_page')
+    assert hasattr(client, 'get_block_children')
 
 
 def test_notion_content_processor_creation():
@@ -138,34 +135,37 @@ def test_notion_content_processor_creation():
     api_client = NotionAPIClient(credentials=credentials)
     processor = NotionContentProcessor(api_client=api_client)
     
-    assert hasattr(processor, 'convert_content')
-    assert hasattr(processor, 'process_blocks')
-    assert hasattr(processor, 'extract_text')
+    assert hasattr(processor, 'process_page')
+    assert hasattr(processor, 'process_database')
+    assert processor.api_client == api_client
 
 
 def test_relation_discovery_engine_creation():
     """Test RelationDiscoveryEngine instantiation."""
-    from universal_notion_sync import RelationDiscoveryEngine, NotionCredentials
+    from universal_notion_sync import RelationDiscoveryEngine, NotionAPIClient, NotionContentProcessor, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
-    engine = RelationDiscoveryEngine(credentials=credentials)
+    api_client = NotionAPIClient(credentials=credentials)
+    processor = NotionContentProcessor(api_client=api_client)
+    engine = RelationDiscoveryEngine(api_client=api_client, processor=processor)
     
-    assert hasattr(engine, 'discover_relations')
-    assert hasattr(engine, 'map_relations')
-    assert hasattr(engine, 'validate_relations')
+    assert hasattr(engine, 'discover_hierarchy')
+    assert engine.api_client == api_client
+    assert engine.processor == processor
 
 
 def test_universal_notion_sync_engine_creation():
     """Test UniversalNotionSyncEngine instantiation."""
-    from universal_notion_sync import UniversalNotionSyncEngine, NotionCredentials
+    from universal_notion_sync import UniversalNotionSyncEngine, SyncConfiguration, NotionCredentials
     
     credentials = NotionCredentials(token="test_token")
-    engine = UniversalNotionSyncEngine(credentials=credentials)
+    config = SyncConfiguration(credentials=credentials)
+    engine = UniversalNotionSyncEngine(config=config)
     
-    assert engine.credentials.token == "test_token"
-    assert hasattr(engine, 'sync_to_target')
-    assert hasattr(engine, 'batch_sync')
-    assert hasattr(engine, 'sync_to_page')
+    assert engine.config.credentials.token == "test_token"
+    assert hasattr(engine, 'sync_target')
+    assert hasattr(engine, 'sync_all_targets')
+    assert hasattr(engine, 'discover_and_add_hierarchy')
 
 
 def test_configuration_manager_creation():
@@ -194,42 +194,60 @@ def test_sync_result_model():
     from universal_notion_sync import SyncResult
     
     # Check actual field names from the model
+    start_time = datetime.now()
+    end_time = start_time + timedelta(seconds=30)
+    
     result = SyncResult(
-        sync_id="sync_123",
-        target_id="db_123", 
-        status="success",
-        pages_processed=10,
-        timestamp=datetime.now(),
-        total_pages=12
+        target_id="db_123",
+        target_name="test_target",
+        success=True,
+        start_time=start_time,
+        end_time=end_time,
+        changes_detected=True,
+        output_file="./output.md"
     )
     
     assert result.target_id == "db_123"
-    assert result.pages_processed == 10
-    assert result.total_pages == 12
+    assert result.target_name == "test_target"
+    assert result.success is True
+    assert result.changes_detected is True
+    assert result.output_file == "./output.md"
+    assert result.duration_seconds == 30.0
 
 
 def test_batch_sync_result_model():
     """Test BatchSyncResult model creation."""
     from universal_notion_sync import BatchSyncResult, SyncResult
     
+    start_time = datetime.now()
+    end_time = start_time + timedelta(seconds=30)
+    
     individual_result = SyncResult(
-        sync_id="sync_123",
         target_id="db_123",
-        status="success", 
-        pages_processed=5,
-        timestamp=datetime.now(),
-        total_pages=5
+        target_name="test_target",
+        success=True,
+        start_time=start_time,
+        end_time=end_time
     )
+    
+    batch_start_time = datetime.now()
+    batch_end_time = batch_start_time + timedelta(seconds=60)
     
     batch_result = BatchSyncResult(
         batch_id="batch_123",
-        results=[individual_result],
-        status="completed",
-        timestamp=datetime.now()
+        start_time=batch_start_time,
+        end_time=batch_end_time,
+        total_targets=1,
+        successful_syncs=1,
+        failed_syncs=0,
+        results=[individual_result]
     )
     
     assert len(batch_result.results) == 1
     assert batch_result.results[0].target_id == "db_123"
+    assert batch_result.total_targets == 1
+    assert batch_result.successful_syncs == 1
+    assert batch_result.success_rate == 1.0
 
 
 def test_tasks_import_optional():
