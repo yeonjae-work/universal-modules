@@ -249,13 +249,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          if git diff --quiet packages/${{ matrix.module }}/docs/; then
+          # docs 디렉터리가 존재하는지 확인
+          if [ ! -d "packages/${{ matrix.module }}/docs" ]; then
+            echo "📁 docs 디렉터리 생성: packages/${{ matrix.module }}/docs"
+            mkdir -p packages/${{ matrix.module }}/docs
+          fi
+          
+          # Git에 docs 디렉터리 추가 (존재하지 않는 경우)
+          git add packages/${{ matrix.module }}/docs/ || true
+          
+          # 변경사항 확인
+          if git diff --quiet HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null; then
             echo "changes=false" >> $GITHUB_OUTPUT
             echo "📄 ${{ matrix.module }}: 문서 변경사항 없음"
           else
             echo "changes=true" >> $GITHUB_OUTPUT
             echo "📝 ${{ matrix.module }}: 문서 업데이트 감지"
-            git diff --name-only packages/${{ matrix.module }}/docs/
+            git diff --name-only HEAD packages/${{ matrix.module }}/docs/ 2>/dev/null || echo "새로운 문서 파일 감지"
           fi
       
       - name: 문서 변경사항 커밋
@@ -316,9 +326,12 @@ jobs:
       
       - name: 통합 문서 변경사항 확인 및 푸시
         run: |
-          if ! git diff --quiet packages/*/docs/; then
+          # 모든 docs 디렉터리를 Git에 추가
+          git add packages/*/docs/ || true
+          
+          # 변경사항이 있는지 확인
+          if ! git diff --quiet --cached 2>/dev/null; then
             echo "📚 통합 문서 업데이트 감지"
-            git add packages/*/docs/
             git commit -m "docs: 변경된 모듈 기술명세서 자동 업데이트
             
             🤖 자동 생성된 문서 업데이트:
