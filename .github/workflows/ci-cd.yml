@@ -443,12 +443,17 @@ jobs:
   notify:
     name: "배포 알림"
     runs-on: ubuntu-latest
-    needs: [detect-changes, deploy]
-    if: always() && needs.detect-changes.outputs.has-changes == 'true'
+    needs: [detect-changes, quality-check, test, build, documentation, docs-consolidate, deploy]
+    if: always()
     
     steps:
+      - name: 변경사항 없음 알림
+        if: needs.detect-changes.outputs.has-changes == 'false'
+        run: |
+          echo "📄 변경된 모듈이 없어 배포를 건너뜁니다."
+
       - name: 배포 성공 알림
-        if: needs.deploy.result == 'success'
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'success'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -511,8 +516,180 @@ jobs:
             echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
           fi
 
+      - name: 코드 품질 검사 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.quality-check.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "⚠️ Universal Modules 코드 품질 검사 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "⚠️ 코드 품질 검사 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "품질 검사 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 테스트 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.test.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "❌ Universal Modules 테스트 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "❌ 테스트 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "테스트 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 빌드 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.build.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "🔨 Universal Modules 빌드 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "🔨 빌드 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "빌드 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "danger"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
+      - name: 문서 업데이트 실패 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.documentation.result == 'failure'
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "📚 Universal Modules 문서 업데이트 실패!",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "📚 문서 업데이트 실패"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "문서 로그 보기"
+                        },
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "style": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }' \
+              ${{ secrets.SLACK_WEBHOOK_URL }}
+          else
+            echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
+          fi
+
       - name: 배포 실패 알림
-        if: needs.deploy.result == 'failure'
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'failure'
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
@@ -568,26 +745,26 @@ jobs:
             echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
           fi
 
-      - name: 테스트 실패 알림
-        if: needs.deploy.result == 'skipped' && contains(needs.*.result, 'failure')
+      - name: 전체 워크플로우 성공 알림
+        if: needs.detect-changes.outputs.has-changes == 'true' && needs.deploy.result == 'skipped' && !contains(needs.*.result, 'failure')
         run: |
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \
               --data '{
-                "text": "⚠️ Universal Modules 테스트 실패!",
+                "text": "✅ Universal Modules 처리 완료 (배포 없음)",
                 "blocks": [
                   {
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": "⚠️ 테스트 실패"
+                      "text": "✅ 처리 완료"
                     }
                   },
                   {
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
+                      "text": "*모듈:* ${{ needs.detect-changes.outputs.changed-modules }}\n*상태:* 테스트/빌드 성공, 버전 변경 없어 배포 스킵\n*브랜치:* ${{ github.ref_name }}\n*작성자:* ${{ github.actor }}"
                     }
                   },
                   {
@@ -597,10 +774,9 @@ jobs:
                         "type": "button",
                         "text": {
                           "type": "plain_text",
-                          "text": "테스트 로그 보기"
+                          "text": "워크플로우 로그 보기"
                         },
-                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                        "style": "primary"
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                       }
                     ]
                   }
@@ -609,9 +785,4 @@ jobs:
               ${{ secrets.SLACK_WEBHOOK_URL }}
           else
             echo "SLACK_WEBHOOK_URL이 설정되지 않아 Slack 알림을 건너뜁니다."
-          fi
-
-      - name: 변경사항 없음 알림
-        if: needs.detect-changes.outputs.has-changes == 'false'
-        run: |
-          echo "📄 변경된 모듈이 없어 배포를 건너뜁니다." 
+          fi 
