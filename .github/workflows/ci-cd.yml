@@ -13,6 +13,9 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.11"
+  # GitHub 이메일 알림 비활성화
+  ACTIONS_RUNNER_DEBUG: false
+  ACTIONS_STEP_DEBUG: false
 
 jobs:
   # 변경된 모듈 감지
